@@ -14,15 +14,106 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   firstName    String
   lastName     String
-  email        String   @unique
-  password     String
-  cpf          String   @unique
+  email        String    @unique
+  password     String    @unique 
+  cpf          String    @unique
   profileImage String?
   description  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
+
+  courses Course[]
+  goals   Goal[]
+}
+
+model Course {
+  id             Int          @id @default(autoincrement())
+  name           String
+  platform       Platform
+  platformCustom String? // caso platform = OUTROS
+  duration       String
+  topic          Topic
+  topicCustom    String? // caso topic = OUTROS
+  progress       Int          @default(0)
+  rating         Int          @default(0)
+  comment        String?
+  status         CourseStatus
+  startDate      DateTime
+  endDate        DateTime?
+  description    String?
+  instructor     String?
+  language       Language?
+  languageCustom String? // caso language = OUTROS
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Goal {
+  id          Int        @id @default(autoincrement())
+  title       String
+  type        GoalType
+  target      Int
+  current     Int        @default(0)
+  unit        String
+  topic       Topic?
+  deadline    DateTime
+  status      GoalStatus
+  createdAt   DateTime   @default(now())
+  completedAt DateTime?
+  description String?
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+enum Topic {
+  FRONTEND
+  BACKEND
+  DEVOPS
+  FULLSTACK
+  MOBILE
+  DATASCIENCE
+  DESIGN
+  OUTROS
+}
+
+enum Platform {
+  EDX
+  UDEMY
+  ALURA
+  ROCKETSEAT
+  COURSERA
+  VUEMASTERY
+  YOUTUBE
+  OUTROS
+}
+
+enum CourseStatus {
+  NAO_INICIADO
+  EM_PROGRESSO
+  CONCLUIDO
+}
+
+enum GoalType {
+  HORAS_TOTAIS
+  HORAS_TOPICO
+  CURSOS_CONCLUIDOS
+  PERIODO_ESTUDO
+}
+
+enum GoalStatus {
+  ATIVA
+  CONCLUIDA
+  VENCIDA
+}
+
+enum Language {
+  PORTUGUES
+  ENGLISH
+  OUTROS
 }

@@ -107,6 +107,15 @@ export class PrismaUserRepository implements IUserRepository {
     );
   }
 
+  async findByCpf(cpf: string): Promise<User | null> {
+    return await this.prisma.user.findFirst({
+      where: {
+        cpf,
+        deletedAt: null,
+      },
+    });
+  }
+
   async delete(id: string): Promise<void> {
     await this.prisma.user.update({ where: { id: Number(id) }, data: { deletedAt: new Date() } });
   }

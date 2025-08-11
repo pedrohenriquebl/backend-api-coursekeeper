@@ -1,20 +1,34 @@
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
-import { Inject } from '@nestjs/common';
+import { ConflictException, Inject } from '@nestjs/common';
 import { CreateUserDto } from '../../presentation/dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../domain/entities/user.entity';
 import { UpdateUserDto } from '../../presentation/dtos/update-user.dto';
-import { LoginResponseDto, LoginUserDto } from '../../presentation/dtos/login-user.dto';
+import {
+  LoginResponseDto,
+  LoginUserDto,
+} from '../../presentation/dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 
 export class UserService {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
+    const existingCpfUser = await this.userRepository.findByCpf(dto.cpf);
+
+    if (existingCpfUser) {
+      throw new ConflictException('Usuário com CPF já cadastrado');
+    }
+
+    const existingEmailUser = await this.userRepository.findByEmail(dto.email);
+    if (existingEmailUser) {
+      throw new ConflictException('Usuário com email já cadastrado');
+    }
+
     const hashPassword: string = await bcrypt.hash(dto.password, 10);
     const user = new User(
       undefined,
@@ -52,6 +66,10 @@ export class UserService {
     return this.userRepository.findById(id);
   }
 
+  async findByCpf(cpf: string): Promise<User | null> {
+    return this.userRepository.findByCpf(cpf);
+  }
+
   async restoreUser(id: string): Promise<User | null> {
     const user = await this.userRepository.findById(id);
     if (!user) return null;
@@ -74,7 +92,10 @@ export class UserService {
     const user = await this.userRepository.findByEmail(loginDto.email);
     if (!user) return null;
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
     if (!isPasswordValid) return null;
 
     const payload = { sub: user.id, email: user.email };
@@ -84,7 +105,7 @@ export class UserService {
 
     return {
       access_token: token,
-      user: userWithoutPassword
+      user: userWithoutPassword,
     };
   }
 }
