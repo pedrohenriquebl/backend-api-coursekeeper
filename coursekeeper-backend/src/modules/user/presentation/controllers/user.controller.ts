@@ -7,17 +7,19 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../../application/services/user.service';
 import { User } from '../../domain/entities/user.entity';
 import { CreateUserDto } from '../dtos/create-user.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { LoginUserDto } from '../dtos/login-user.dto';
 import { AuthService } from '../../../auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -28,7 +30,7 @@ export class UserController {
   ) {}
 
   @ApiOperation({ summary: 'Create a new user' })
-  @Post()
+  @Post('register')
   async createUser(@Body() dto: CreateUserDto): Promise<User> {
     return this.userService.createUser(dto);
   }
@@ -41,6 +43,14 @@ export class UserController {
       throw new UnauthorizedException('Email or password is incorrect');
     }
     return loginResult;
+  }
+
+  @ApiBearerAuth('jwt-auth')
+  @ApiOperation({ summary: 'User Information' })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  async getMe(@Req() req: Request & { user: User }) {
+    return req.user;
   }
 
   @ApiOperation({ summary: 'Get a user by ID' })
