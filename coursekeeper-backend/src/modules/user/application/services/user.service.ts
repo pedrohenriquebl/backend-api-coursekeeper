@@ -4,12 +4,14 @@ import { CreateUserDto } from '../../presentation/dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../domain/entities/user.entity';
 import { UpdateUserDto } from '../../presentation/dtos/update-user.dto';
-import { LoginUserDto } from '../../presentation/dtos/login-user.dto';
+import { LoginResponseDto, LoginUserDto } from '../../presentation/dtos/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 export class UserService {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    private readonly jwtService: JwtService
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
@@ -68,13 +70,21 @@ export class UserService {
     await this.userRepository.update(user);
   }
 
-  async login(loginDto: LoginUserDto): Promise<User | null> {
+  async login(loginDto: LoginUserDto): Promise<LoginResponseDto | null> {
     const user = await this.userRepository.findByEmail(loginDto.email);
     if (!user) return null;
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) return null;
 
-    return user;
+    const payload = { sub: user.id, email: user.email };
+    const token = this.jwtService.sign(payload);
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      access_token: token,
+      user: userWithoutPassword
+    };
   }
 }
