@@ -218,4 +218,12 @@ export class PrismaCourseRepository implements ICourseRepository {
       data: { deletedAt: new Date() },
     });
   }
+
+  async findRecentByUser(userId: number, limit: number): Promise<Courses[]> {
+    return this.prisma.course.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
 }

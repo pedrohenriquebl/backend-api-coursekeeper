@@ -50,7 +50,16 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   async getMe(@Req() req: Request & { user: User }) {
-    return req.user;
+    const user = req.user;
+
+    if (!user) throw new UnauthorizedException();
+
+    const generalCoursesInfo = await this.userService.getCourseStats(Number(user?.id));
+
+    return {
+        ...user,
+        generalCoursesInfo
+    }
   }
 
   @ApiOperation({ summary: 'Get a user by ID' })

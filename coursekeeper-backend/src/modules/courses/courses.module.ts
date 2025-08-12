@@ -14,6 +14,6 @@ import { PrismaCourseRepository } from './infra/prisma/prisma-courses.repository
       useClass: PrismaCourseRepository,
     },
   ],
-  exports: [CourseService],
+  exports: [CourseService, 'ICourseRepository'],
 })
 export class CourseModule {}

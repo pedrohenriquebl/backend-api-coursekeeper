@@ -9,11 +9,14 @@ import {
   LoginUserDto,
 } from '../../presentation/dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import type { ICourseRepository } from '../../../courses/domain/repositories/courses.repository.interface';
 
 export class UserService {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @Inject('ICourseRepository')
+    private readonly courseRepository: ICourseRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -96,6 +99,7 @@ export class UserService {
       loginDto.password,
       user.password,
     );
+
     if (!isPasswordValid) return null;
 
     const payload = { sub: user.id, email: user.email };
@@ -106,6 +110,20 @@ export class UserService {
     return {
       access_token: token,
       user: userWithoutPassword,
+    };
+  }
+
+  async getCourseStats(userId: number) {
+    const courses = await this.courseRepository.findAllByUser(userId);
+
+    return {
+      totalCourses: courses.length,
+      totalCompletedCourses: courses.filter((c) => c.status === 'CONCLUIDO')
+        .length,
+      totalStudiedHours: courses.reduce(
+        (sum, c) => sum + (c.studiedHours ?? 0),
+        0,
+      ),
     };
   }
 }

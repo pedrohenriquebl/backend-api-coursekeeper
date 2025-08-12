@@ -7,4 +7,5 @@ export interface ICourseRepository {
     create(course: Courses): Promise<Courses>;
     update(course: Courses): Promise<Courses | null>;
     delete(id: number): Promise<void>;
+    findRecentByUser(userId: number, limit: number): Promise<Courses[]>;
 }

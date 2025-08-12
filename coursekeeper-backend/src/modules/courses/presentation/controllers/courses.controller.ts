@@ -28,13 +28,18 @@ export class CourseController {
     return this.courseService.findAllByUser(+userId);
   }
 
+  @Get('recent')
+  async findRecentByUser(@Param('userId', ParseIntPipe) userId: number) {
+    return this.courseService.findRecentByUser(userId);
+  }
+
   @Get(':courseId')
   async findById(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('courseId', ParseIntPipe) courseId: number,
   ) {
     return this.courseService.findById(userId, courseId);
-  }
+  }  
 
   @Post()
   async create(
@@ -55,7 +60,7 @@ export class CourseController {
   @Delete(':courseId')
   @HttpCode(204)
   async delete(
-    @Param('userId') userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Param('courseId', ParseIntPipe) courseId: number,
   ) {
     await this.courseService.delete(+userId, +courseId);

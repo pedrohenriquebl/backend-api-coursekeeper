@@ -3,8 +3,9 @@ import { UserService } from './application/services/user.service';
 import { PrismaUserRepository } from './infra/prisma/prisma-user.repository';
 import { PrismaService } from '../../prisma.service';
 import { AuthModule } from '../auth/auth.module';
+import { CourseModule } from '../courses/courses.module';
 @Module({
-  imports: [forwardRef(() => AuthModule)],
+  imports: [forwardRef(() => AuthModule), CourseModule],
   providers: [
     UserService,
     PrismaService,

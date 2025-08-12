@@ -18,6 +18,10 @@ export class CourseService {
     return course;
   }
 
+  async findRecentByUser(userId: number): Promise<Courses[]> {
+  return this.courseRepository.findRecentByUser(userId, 3);
+}
+
   async findAllByUser(userId: number): Promise<Courses[]> {
     const courses = await this.courseRepository.findAllByUser(userId);
     if (!courses || courses.length === 0)
