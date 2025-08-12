@@ -102,6 +102,12 @@ export class UserService {
 
     if (!isPasswordValid) return null;
 
+    const userId = user.id;
+
+    if (!userId) return null;
+
+    const courseStats = await this.getCourseStats(userId);
+
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
@@ -110,6 +116,7 @@ export class UserService {
     return {
       access_token: token,
       user: userWithoutPassword,
+      courseStats
     };
   }
 

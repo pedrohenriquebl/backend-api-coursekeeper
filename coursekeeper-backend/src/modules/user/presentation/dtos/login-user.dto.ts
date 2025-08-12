@@ -16,4 +16,9 @@ export class LoginUserDto {
 export class LoginResponseDto {
   access_token: string;
   user: Omit<User, 'password'>;
+  courseStats?: {
+    totalCourses: number;
+    totalCompletedCourses: number;
+    totalStudiedHours: number;
+  };
 }
