@@ -18,7 +18,7 @@ model User {
   firstName    String
   lastName     String
   email        String    @unique
-  password     String    @unique 
+  password     String    @unique
   cpf          String    @unique
   profileImage String?
   description  String?
@@ -35,7 +35,8 @@ model Course {
   name           String
   platform       Platform
   platformCustom String? // caso platform = OUTROS
-  duration       String
+  duration       Int          @default(0)
+  studiedHours   Int          @default(0)
   topic          Topic
   topicCustom    String? // caso topic = OUTROS
   progress       Int          @default(0)
@@ -51,6 +52,10 @@ model Course {
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Goal {
@@ -114,6 +119,8 @@ enum GoalStatus {
 
 enum Language {
   PORTUGUES
-  ENGLISH
+  INGLES
+  ESPANHOL
+  FRANCES
   OUTROS
 }
