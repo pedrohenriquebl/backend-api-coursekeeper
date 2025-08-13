@@ -79,6 +79,9 @@ export class PrismaCourseRepository implements ICourseRepository {
         userId,
         deletedAt: null,
       },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
 
     return courses.map(

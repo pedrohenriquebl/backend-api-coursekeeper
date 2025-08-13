@@ -97,8 +97,8 @@ export class CourseService {
     }
 
     let status = dto.status ?? course.status;
-    if (progress === 0) status = 'NAO_INICIADO';
-    else if (progress > 0 && progress < 100) status = 'EM_PROGRESSO';
+    if (progress === null) status = 'NAO_INICIADO';
+    else if (progress >= 0 && progress < 100) status = 'EM_PROGRESSO';
     else if (progress >= 100) status = 'CONCLUIDO';
 
     const dataToUpdate = {
