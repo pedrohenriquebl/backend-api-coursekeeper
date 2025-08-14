@@ -3,6 +3,7 @@ import type { IGoalsRepository } from '../../domain/repositories/goals.repositor
 import { Goal } from '../../domain/entities/goals.entity';
 import { CreateGoalDto } from '../../presentation/dto/create-goals.dto';
 import { GoalStatus, GoalType } from '@prisma/client';
+import { GoalOverviewDto } from '../../presentation/dto/get-overview-dto';
 
 export class GoalService {
   constructor(
@@ -54,21 +55,11 @@ export class GoalService {
     courseStatus?: string,
   ): Promise<void> {
     const activeGoals = await this.goalsRepository.findAllByUser(userId);
-    console.log('[GoalService] All user goals:', activeGoals);
-
     const filteredGoals = activeGoals.filter((goal) => goal.isActive);
-    console.log('[GoalService] Active goals:', filteredGoals);
 
     const today = new Date();
 
     for (const goal of filteredGoals) {
-      console.log(
-        '[GoalService] Processing goal:',
-        goal.id,
-        goal.type,
-        goal.topic,
-      );
-
       let newCurrent = goal.current ?? 0;
       let newStatus = goal.status;
       let isActive = goal.isActive;
@@ -78,7 +69,6 @@ export class GoalService {
         goal.deadline < today &&
         goal.status !== GoalStatus.CONCLUIDA
       ) {
-        console.log('[GoalService] Goal expired:', goal.id);
         await this.goalsRepository.update(goal.id, {
           status: GoalStatus.VENCIDA,
           isActive: false,
@@ -87,17 +77,8 @@ export class GoalService {
         continue;
       }
 
-      console.log('[GoalService] Goal type:', goal.type);
-      console.log(
-        '[GoalService] Comparing topics - Goal:',
-        goal.topic,
-        'Course:',
-        topic,
-      );
-
       switch (goal.type as GoalType) {
         case 'HORAS_TOTAIS':
-          console.log('[GoalService] Updating HORAS_TOTAIS goal');
           newCurrent += studiedHoursDiff;
           if (newCurrent >= goal.target) {
             newCurrent = goal.target;
@@ -110,10 +91,7 @@ export class GoalService {
           const goalTopic = goal.topic?.toUpperCase().trim();
           const courseTopic = topic?.toUpperCase().trim();
 
-          console.log('Comparing topics:', goalTopic, 'vs', courseTopic);
-
           if (goalTopic === courseTopic) {
-            console.log('Topics match - updating goal:', goal.id);
             newCurrent = Math.max(0, (goal.current ?? 0) + studiedHoursDiff);
             if (newCurrent >= goal.target) {
               newCurrent = goal.target;
@@ -163,5 +141,36 @@ export class GoalService {
         updatedAt: new Date(),
       });
     }
+  }
+
+  async getOverview(userId: number): Promise<GoalOverviewDto> {
+    const goals = await this.getAll(userId);
+
+    const activeGoals = goals.filter(
+      (g) => g.isActive && g.status === GoalStatus.ATIVA,
+    );
+
+    const completedGoals = goals.filter(
+      (g) => !g.isActive && g.status === GoalStatus.CONCLUIDA,
+    );
+
+    const hourGoals = goals.filter(
+      (g) =>
+        g.type === GoalType.HORAS_TOTAIS || g.type === GoalType.HORAS_TOPICO,
+    );
+
+    const studiedHours = hourGoals.reduce((sum, g) => sum + (g.current ?? 0), 0);
+    const targetHours = hourGoals.reduce((sum, g) => sum + (g.target ?? 0), 0);
+
+    return {
+      activeGoals: activeGoals.length,
+      goalsCompleted: completedGoals.length,
+      goalsRating:
+        (completedGoals.length /
+          (activeGoals.length + completedGoals.length || 1)) *
+        100,
+      totalProgressInHours: studiedHours,
+      totalGoalInHours: targetHours,
+    };
   }
 }
