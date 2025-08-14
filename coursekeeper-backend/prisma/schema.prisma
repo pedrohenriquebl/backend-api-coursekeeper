@@ -60,15 +60,17 @@ model Course {
 
 model Goal {
   id          Int        @id @default(autoincrement())
+  isActive    Boolean    @default(true)
   title       String
   type        GoalType
   target      Int
   current     Int        @default(0)
-  unit        String
+  unit        GoalUnits
   topic       Topic?
   deadline    DateTime
   status      GoalStatus
   createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   completedAt DateTime?
   description String?
 
@@ -115,6 +117,12 @@ enum GoalStatus {
   ATIVA
   CONCLUIDA
   VENCIDA
+}
+
+enum GoalUnits {
+  HORAS
+  CURSOS
+  DIAS
 }
 
 enum Language {

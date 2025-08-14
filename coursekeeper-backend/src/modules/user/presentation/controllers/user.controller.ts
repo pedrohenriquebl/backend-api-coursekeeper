@@ -55,10 +55,12 @@ export class UserController {
     if (!user) throw new UnauthorizedException();
 
     const generalCoursesInfo = await this.userService.getCourseStats(Number(user?.id));
+    const goalsStats = await this.userService.getGoalsStats(Number(user?.id));
 
     return {
         ...user,
-        generalCoursesInfo
+        generalCoursesInfo,
+        goalsStats
     }
   }
 

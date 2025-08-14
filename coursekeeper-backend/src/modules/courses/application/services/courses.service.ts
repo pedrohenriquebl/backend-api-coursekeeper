@@ -3,11 +3,13 @@ import type { ICourseRepository } from '../../domain/repositories/courses.reposi
 import { Courses } from '../../domain/entities/courses.entity';
 import { CreateCourseDto } from '../../presentation/dtos/create-course.dto';
 import { UpdateCourseDto } from '../../presentation/dtos/update-course.dto';
+import { GoalService } from 'src/modules/goals/application/services/goal.service';
 
 export class CourseService {
   constructor(
     @Inject('ICourseRepository')
     private readonly courseRepository: ICourseRepository,
+    private readonly goalService: GoalService,
   ) {}
 
   async findById(userId: number, courseId: number): Promise<Courses | null> {
@@ -19,8 +21,8 @@ export class CourseService {
   }
 
   async findRecentByUser(userId: number): Promise<Courses[]> {
-  return this.courseRepository.findRecentByUser(userId, 3);
-}
+    return this.courseRepository.findRecentByUser(userId, 3);
+  }
 
   async findAllByUser(userId: number): Promise<Courses[]> {
     const courses = await this.courseRepository.findAllByUser(userId);
@@ -113,6 +115,27 @@ export class CourseService {
       ...course,
       ...dataToUpdate,
     });
+
+    if (
+      dto.studiedHours !== undefined &&
+      dto.studiedHours !== course.studiedHours
+    ) {
+      const studiedHoursDiff = (dto.studiedHours ?? 0) - (course.studiedHours ?? 0);
+      console.log('Updating goal progress with:', {
+        userId: course.userId,
+        studiedHoursDiff: Math.ceil(studiedHoursDiff),
+        topic: course.topic,
+        status: course.status,
+        oldHours: course.studiedHours,
+        newHours: dto.studiedHours,
+      });
+      await this.goalService.updateGoalProgress(
+        course.userId,
+        studiedHoursDiff,
+        course.topic,
+        course.status,
+      );
+    }
 
     return updatedCourse;
   }

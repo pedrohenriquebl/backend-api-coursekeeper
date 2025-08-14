@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../domain/entities/user.entity';
+import { LatestGoal } from 'src/modules/goals/domain/entities/goals.entity';
 
 export class LoginUserDto {
   @ApiProperty({ example: 'user@email.com' })
@@ -20,5 +21,9 @@ export class LoginResponseDto {
     totalCourses: number;
     totalCompletedCourses: number;
     totalStudiedHours: number;
+  };
+  goalsStats?: {
+    goalsProgressPercent: number;
+    latestGoal: LatestGoal | null;
   };
 }

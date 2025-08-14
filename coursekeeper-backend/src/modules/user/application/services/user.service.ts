@@ -10,6 +10,9 @@ import {
 } from '../../presentation/dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import type { ICourseRepository } from '../../../courses/domain/repositories/courses.repository.interface';
+import { GoalService } from 'src/modules/goals/application/services/goal.service';
+import { GoalStatus } from '@prisma/client';
+import { LatestGoal } from 'src/modules/goals/domain/entities/goals.entity';
 
 export class UserService {
   constructor(
@@ -18,6 +21,7 @@ export class UserService {
     @Inject('ICourseRepository')
     private readonly courseRepository: ICourseRepository,
     private readonly jwtService: JwtService,
+    private readonly goalService: GoalService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
@@ -107,6 +111,7 @@ export class UserService {
     if (!userId) return null;
 
     const courseStats = await this.getCourseStats(userId);
+    const goalStats = await this.getGoalsStats(userId);
 
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
@@ -116,7 +121,8 @@ export class UserService {
     return {
       access_token: token,
       user: userWithoutPassword,
-      courseStats
+      courseStats,
+      goalsStats: goalStats,
     };
   }
 
@@ -131,6 +137,49 @@ export class UserService {
         (sum, c) => sum + (c.studiedHours ?? 0),
         0,
       ),
+    };
+  }
+
+  async getGoalsStats(userId: number) {
+    const goals = await this.goalService.getAll(userId);
+
+    const activeGoals = goals.filter((g) => g.isActive && g.status === 'ATIVA');
+    const completedGoals = goals.filter(
+      (g) => !g.isActive && g.status === GoalStatus.CONCLUIDA,
+    );
+    const totalGoals = activeGoals.length + completedGoals.length;
+
+    let goalsProgressPercent = 0;
+
+    if (totalGoals > 0) {
+      const activeProgressSum = activeGoals.reduce(
+        (sum, g) => sum + ((g.current ?? 0) / g.target) * 100,
+        0,
+      );
+
+      const completedProgressSum = completedGoals.length * 100;
+
+      goalsProgressPercent =
+        (activeProgressSum + completedProgressSum) / totalGoals;
+    }
+
+    let latestGoal: LatestGoal | null = null;
+    if (goals.length > 0) {
+      const sortedGoals = [...goals].sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      );
+      const recent = sortedGoals[0];
+      latestGoal = {
+        title: recent.title,
+        target: recent.target,
+        current: recent.current,
+        status: recent.status,
+      };
+    }
+
+    return {
+      goalsProgressPercent,
+      latestGoal,
     };
   }
 }
