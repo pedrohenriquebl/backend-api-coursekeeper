@@ -25,10 +25,7 @@ export class CourseService {
   }
 
   async findAllByUser(userId: number): Promise<Courses[]> {
-    const courses = await this.courseRepository.findAllByUser(userId);
-    if (!courses || courses.length === 0)
-      throw new NotFoundException('No courses found for this user');
-    return courses;
+    return await this.courseRepository.findAllByUser(userId) ?? [];
   }
 
   async create(userId: number, dto: CreateCourseDto): Promise<Courses> {
@@ -135,7 +132,7 @@ export class CourseService {
         status,
       );
     }
-    
+
     return updatedCourse;
   }
 
