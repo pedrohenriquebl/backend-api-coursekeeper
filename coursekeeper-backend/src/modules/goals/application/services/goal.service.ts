@@ -12,17 +12,22 @@ export class GoalService {
   ) {}
 
   async create(userId: number, dto: CreateGoalDto): Promise<Goal> {
-    const goal = await this.goalsRepository.create({
-      ...dto,
-      userId,
-      current: 0,
-      isActive: true,
-      status: GoalStatus.ATIVA,
-      topic: dto.topic ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    return goal;
+    try {
+      return await this.goalsRepository.create({
+        ...dto,
+        userId,
+        current: 0,
+        isActive: true,
+        deadline: new Date(dto.deadline),
+        status: GoalStatus.ATIVA,
+        topic: dto.topic ?? null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      console.error('Erro ao criar goal:', error);
+      throw error;
+    }
   }
 
   async getAll(userId: number): Promise<Goal[]> {
@@ -159,7 +164,10 @@ export class GoalService {
         g.type === GoalType.HORAS_TOTAIS || g.type === GoalType.HORAS_TOPICO,
     );
 
-    const studiedHours = hourGoals.reduce((sum, g) => sum + (g.current ?? 0), 0);
+    const studiedHours = hourGoals.reduce(
+      (sum, g) => sum + (g.current ?? 0),
+      0,
+    );
     const targetHours = hourGoals.reduce((sum, g) => sum + (g.target ?? 0), 0);
 
     return {

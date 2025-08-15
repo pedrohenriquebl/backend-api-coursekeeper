@@ -116,27 +116,26 @@ export class CourseService {
       ...dataToUpdate,
     });
 
-    if (
+    let studiedHoursDiff = 0;
+
+    if (dto.status === 'CONCLUIDO' && course.status !== 'CONCLUIDO') {
+      studiedHoursDiff = course.duration - course.studiedHours;
+    } else if (
       dto.studiedHours !== undefined &&
       dto.studiedHours !== course.studiedHours
     ) {
-      const studiedHoursDiff = (dto.studiedHours ?? 0) - (course.studiedHours ?? 0);
-      console.log('Updating goal progress with:', {
-        userId: course.userId,
-        studiedHoursDiff: Math.ceil(studiedHoursDiff),
-        topic: course.topic,
-        status: course.status,
-        oldHours: course.studiedHours,
-        newHours: dto.studiedHours,
-      });
+      studiedHoursDiff = (dto.studiedHours ?? 0) - (course.studiedHours ?? 0);
+    }
+
+    if (studiedHoursDiff > 0) {
       await this.goalService.updateGoalProgress(
         course.userId,
         studiedHoursDiff,
         course.topic,
-        course.status,
+        status,
       );
     }
-
+    
     return updatedCourse;
   }
 
