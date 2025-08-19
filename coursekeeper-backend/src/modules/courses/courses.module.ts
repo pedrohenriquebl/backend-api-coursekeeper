@@ -6,6 +6,7 @@ import { PrismaCourseRepository } from './infra/prisma/prisma-courses.repository
 import { CqrsModule } from '@nestjs/cqrs';
 import { GoalService } from '../goals/application/services/goal.service';
 import { GoalModule } from '../goals/goals.module';
+import { DailyUpdateCronService } from './application/tasks/course-status.task';
 
 @Module({
   imports: [forwardRef(() => AuthModule), CqrsModule, GoalModule],
@@ -13,6 +14,7 @@ import { GoalModule } from '../goals/goals.module';
     CourseService,
     PrismaService,
     GoalService,
+    DailyUpdateCronService,
     {
       provide: 'ICourseRepository',
       useClass: PrismaCourseRepository,

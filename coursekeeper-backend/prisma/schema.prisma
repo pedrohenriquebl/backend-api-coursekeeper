@@ -104,6 +104,7 @@ enum CourseStatus {
   NAO_INICIADO
   EM_PROGRESSO
   CONCLUIDO
+  NAO_CONCLUIDO
 }
 
 enum GoalType {

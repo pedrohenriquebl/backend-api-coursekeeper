@@ -61,4 +61,8 @@ export class PrismaGoalsRepository implements IGoalsRepository {
       completedAt: goal.completedAt ? new Date(goal.completedAt) : null,
     };
   }
+
+  findAll(): Promise<Goal[]> {
+    return this.prisma.goal.findMany() as unknown as Promise<Goal[]>;
+  }
 }

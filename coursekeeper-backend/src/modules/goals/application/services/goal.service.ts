@@ -155,6 +155,10 @@ export class GoalService {
       (g) => g.isActive && g.status === GoalStatus.ATIVA,
     );
 
+    const inactiveGoals = goals.filter(
+      (g) => !g.isActive && g.status === GoalStatus.VENCIDA,
+    );
+
     const completedGoals = goals.filter(
       (g) => !g.isActive && g.status === GoalStatus.CONCLUIDA,
     );
@@ -175,10 +179,16 @@ export class GoalService {
       goalsCompleted: completedGoals.length,
       goalsRating:
         (completedGoals.length /
-          (activeGoals.length + completedGoals.length || 1)) *
+          (activeGoals.length + completedGoals.length + inactiveGoals.length || 1)) *
         100,
       totalProgressInHours: studiedHours,
       totalGoalInHours: targetHours,
     };
+  }
+
+  async getAllUsers(): Promise<{ id: number }[]> {
+    const goals = await this.goalsRepository.findAll();
+    const userIds = Array.from(new Set(goals.map((g) => g.userId)));
+    return userIds.map((id) => ({ id }));
   }
 }

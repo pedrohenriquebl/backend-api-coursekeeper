@@ -25,7 +25,11 @@ export class CourseService {
   }
 
   async findAllByUser(userId: number): Promise<Courses[]> {
-    return await this.courseRepository.findAllByUser(userId) ?? [];
+    return (await this.courseRepository.findAllByUser(userId)) ?? [];
+  }
+
+  async findAll(): Promise<Courses[]> {
+    return this.courseRepository.findAll();
   }
 
   async create(userId: number, dto: CreateCourseDto): Promise<Courses> {
@@ -39,6 +43,13 @@ export class CourseService {
     if (progress === null) status = 'NAO_INICIADO';
     else if (progress >= 0 && progress < 100) status = 'EM_PROGRESSO';
     else if (progress >= 100) status = 'CONCLUIDO';
+
+    if (dto.endDate) {
+      const endDate = new Date(dto.endDate);
+      if (new Date() > endDate) {
+        status = 'NAO_CONCLUIDO';
+      }
+    }
 
     const course = new Courses({
       id: 0,
@@ -100,6 +111,10 @@ export class CourseService {
     else if (progress >= 0 && progress < 100) status = 'EM_PROGRESSO';
     else if (progress >= 100) status = 'CONCLUIDO';
 
+    if (endDate && new Date() > endDate) {
+      status = 'NAO_CONCLUIDO';
+    }
+
     const dataToUpdate = {
       ...dto,
       startDate,
@@ -144,5 +159,18 @@ export class CourseService {
       throw new ForbiddenException('Access denied');
 
     await this.courseRepository.delete(courseId);
+  }
+
+  async systemUpdateCourse(
+    course: Courses,
+    partial: Partial<Courses>,
+  ): Promise<Courses | null> {
+    const updatedCourse = await this.courseRepository.update({
+      ...course,
+      ...partial,
+      updatedAt: new Date(),
+    });
+
+    return updatedCourse;
   }
 }
