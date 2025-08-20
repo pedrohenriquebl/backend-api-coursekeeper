@@ -54,14 +54,26 @@ export class UserController {
 
     if (!user) throw new UnauthorizedException();
 
-    const generalCoursesInfo = await this.userService.getCourseStats(Number(user?.id));
+    const generalCoursesInfo = await this.userService.getCourseStats(
+      Number(user?.id),
+    );
     const goalsStats = await this.userService.getGoalsStats(Number(user?.id));
 
     return {
-        ...user,
-        generalCoursesInfo,
-        goalsStats
-    }
+      ...user,
+      generalCoursesInfo,
+      goalsStats,
+    };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Put('me')
+  async updateMe(
+    @Req() req: any,
+    @Body() dto: UpdateUserDto,
+  ): Promise<User | null> {
+    const userId = req.user.id;
+    return this.userService.updateUser(userId, dto);
   }
 
   @ApiOperation({ summary: 'Get a user by ID' })

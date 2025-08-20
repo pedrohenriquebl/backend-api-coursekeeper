@@ -62,6 +62,10 @@ export class UserService {
     user.profileImage = dto.profileImage ?? user.profileImage;
     user.description = dto.description ?? user.description;
 
+    if (dto.password) {
+      user.password = await bcrypt.hash(dto.password, 10);
+    }
+
     return this.userRepository.update(user);
   }
 
