@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,7 +10,9 @@ import {
   Put,
   Req,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../../application/services/user.service';
 import { User } from '../../domain/entities/user.entity';
@@ -20,6 +23,8 @@ import { LoginUserDto } from '../dtos/login-user.dto';
 import { AuthService } from '../../../auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { avatarMulterOptions } from 'src/common/upload/avatar.multer';
 
 @ApiTags('users')
 @Controller('users')
@@ -66,14 +71,30 @@ export class UserController {
     };
   }
 
+  @ApiBearerAuth('jwt-auth')
+  @ApiOperation({ summary: 'Upload avatar do usuário logado' })
   @UseGuards(AuthGuard('jwt'))
-  @Put('me')
-  async updateMe(
-    @Req() req: any,
-    @Body() dto: UpdateUserDto,
-  ): Promise<User | null> {
-    const userId = req.user.id;
-    return this.userService.updateUser(userId, dto);
+  @Post('me/avatar')
+  @UseInterceptors(FileInterceptor('file', avatarMulterOptions))
+  async uploadMyAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request & { user: any },
+  ) {
+    if (!file) {
+      throw new BadRequestException('Arquivo é obrigatório');
+    }
+
+    const userId = String(req.user.id);
+    const relativePath = `/public/avatars/${file.filename}`;
+
+    const updated = await this.userService.updateUser(userId, {
+      profileImage: relativePath,
+    });
+
+    return {
+      path: relativePath,
+      user: updated,
+    };
   }
 
   @ApiOperation({ summary: 'Get a user by ID' })

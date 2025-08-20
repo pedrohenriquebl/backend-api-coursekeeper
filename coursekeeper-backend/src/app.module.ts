@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserController } from './modules/user/presentation/controllers/user.controller';
@@ -13,7 +15,17 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DailyUpdateCronService } from './modules/courses/application/tasks/course-status.task';
 
 @Module({
-  imports: [UserModule, AuthModule, CourseModule, GoalModule, ScheduleModule.forRoot()],
+  imports: [
+    UserModule,
+    AuthModule,
+    CourseModule,
+    GoalModule,
+    ScheduleModule.forRoot(),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'),
+      serveRoot: '/public',
+    }),
+  ],
   controllers: [
     AppController,
     UserController,
