@@ -111,7 +111,7 @@ export class CourseService {
     else if (progress >= 0 && progress < 100) status = 'EM_PROGRESSO';
     else if (progress >= 100) status = 'CONCLUIDO';
 
-    if (endDate && new Date() > endDate) {
+    if (status !== 'CONCLUIDO' && endDate && new Date() > endDate) {
       status = 'NAO_CONCLUIDO';
     }
 

@@ -13,7 +13,7 @@ export class DailyUpdateCronService {
   ) {}
 
   // Roda todos os dias às 03:00 da manhã
-  @Cron('0 3 * * *', { timeZone: 'America/Sao_Paulo' })
+  @Cron('11 10 * * *', { timeZone: 'America/Sao_Paulo' })
   async handleDailyUpdate() {
     this.logger.log('Iniciando atualização diária de cursos e metas...');
 

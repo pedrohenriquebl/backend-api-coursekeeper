@@ -10,6 +10,7 @@ import { CourseController } from './modules/courses/presentation/controllers/cou
 import { GoalModule } from './modules/goals/goals.module';
 import { GoalsController } from './modules/goals/presentation/controllers/goals.controller';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DailyUpdateCronService } from './modules/courses/application/tasks/course-status.task';
 
 @Module({
   imports: [UserModule, AuthModule, CourseModule, GoalModule, ScheduleModule.forRoot()],
@@ -19,6 +20,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     CourseController,
     GoalsController,
   ],
-  providers: [AppService, Reflector],
+  providers: [AppService, Reflector, DailyUpdateCronService],
 })
 export class AppModule {}
