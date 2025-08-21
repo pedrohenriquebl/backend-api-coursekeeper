@@ -46,6 +46,15 @@ export class UserService {
       dto.cpf,
       dto.profileImage ?? null,
       dto.description ?? null,
+      new Date(),
+      new Date(),
+      null,
+      null,
+      null,
+      null,
+      0,
+      0,
+      null
     );
 
     return this.userRepository.create(user);
@@ -61,6 +70,9 @@ export class UserService {
     user.cpf = dto.cpf ?? user.cpf;
     user.profileImage = dto.profileImage ?? user.profileImage;
     user.description = dto.description ?? user.description;
+    user.website = dto.website ?? user.website;
+    user.github = dto.github ?? user.github;
+    user.linkedin = dto.linkedin ?? user.linkedin;
 
     if (dto.password) {
       user.password = await bcrypt.hash(dto.password, 10);
@@ -109,6 +121,39 @@ export class UserService {
     );
 
     if (!isPasswordValid) return null;
+
+    const now = new Date();
+    let currentStreak = user.currentLoginStreak ?? 0;
+    let maxStreak = user.maxLoginStreak ?? 0;
+
+    console.log(`Current Streak: ${currentStreak}, Max Streak: ${maxStreak}`);
+
+    if (user.lastLogin) {
+      console.log(`Last Login: ${user.lastLogin}`);
+      const lastLoginDate = new Date(user.lastLogin);
+      const diffInDays = Math.floor(
+        (now.getTime() - lastLoginDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      if (diffInDays === 1) {
+        currentStreak += 1;
+      } else if (diffInDays > 1) {
+        currentStreak = 1;
+      } else {
+        currentStreak = 1;
+      }
+    }
+
+    if (currentStreak > maxStreak) {
+      maxStreak = currentStreak;
+    }
+
+    await this.userRepository.update({
+      ...user,
+      currentLoginStreak: currentStreak,
+      maxLoginStreak: maxStreak,
+      lastLogin: now,
+    });
 
     const userId = user.id;
 

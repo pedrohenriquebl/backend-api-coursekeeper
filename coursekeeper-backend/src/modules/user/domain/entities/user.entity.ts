@@ -11,5 +11,11 @@ export class User {
     public readonly createdAt?: Date,
     public updatedAt?: Date,
     public deletedAt?: Date | null,
+    public linkedin?: string | null,
+    public github?: string | null,
+    public website?: string | null,
+    public currentLoginStreak?: number | null,
+    public maxLoginStreak?: number | null,
+    public lastLogin?: Date | null,
   ) {}
 }

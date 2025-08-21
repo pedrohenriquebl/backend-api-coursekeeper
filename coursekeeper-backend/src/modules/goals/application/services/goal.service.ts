@@ -4,11 +4,14 @@ import { Goal } from '../../domain/entities/goals.entity';
 import { CreateGoalDto } from '../../presentation/dto/create-goals.dto';
 import { GoalStatus, GoalType } from '@prisma/client';
 import { GoalOverviewDto } from '../../presentation/dto/get-overview-dto';
+import type { IUserRepository } from 'src/modules/user/domain/repositories/user.repository.interface';
 
 export class GoalService {
   constructor(
     @Inject('IGoalsRepository')
     private goalsRepository: IGoalsRepository,
+    @Inject('IUserRepository')
+    private userRepository: IUserRepository,
   ) {}
 
   async create(userId: number, dto: CreateGoalDto): Promise<Goal> {
@@ -118,23 +121,15 @@ export class GoalService {
           break;
 
         case 'PERIODO_ESTUDO':
-          const lastUpdate = goal.updatedAt;
-          const lastUpdateDay = lastUpdate ? lastUpdate.getDate() : null;
-          const lastUpdateMonth = lastUpdate ? lastUpdate.getMonth() : null;
-          const lastUpdateYear = lastUpdate ? lastUpdate.getFullYear() : null;
+          const user = await this.userRepository.findById(String(goal.userId));
+          if (!user) break;
 
-          if (
-            !lastUpdate ||
-            lastUpdateDay !== today.getDate() ||
-            lastUpdateMonth !== today.getMonth() ||
-            lastUpdateYear !== today.getFullYear()
-          ) {
-            newCurrent += 1;
-            if (newCurrent >= goal.target) {
-              newCurrent = goal.target;
-              newStatus = GoalStatus.CONCLUIDA;
-              isActive = false;
-            }
+          newCurrent = user.currentLoginStreak ?? 0;
+
+          if (newCurrent >= goal.target) {
+            newCurrent = goal.target;
+            newStatus = GoalStatus.CONCLUIDA;
+            isActive = false;
           }
           break;
       }
@@ -179,7 +174,8 @@ export class GoalService {
       goalsCompleted: completedGoals.length,
       goalsRating:
         (completedGoals.length /
-          (activeGoals.length + completedGoals.length + inactiveGoals.length || 1)) *
+          (activeGoals.length + completedGoals.length + inactiveGoals.length ||
+            1)) *
         100,
       totalProgressInHours: studiedHours,
       totalGoalInHours: targetHours,

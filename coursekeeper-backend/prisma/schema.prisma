@@ -25,6 +25,14 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
+  linkedin     String?
+  github       String?
+  website      String?
+
+  //login streak
+  currentLoginStreak Int          @default(0)
+  maxLoginStreak     Int          @default(0)
+  lastLogin          DateTime?
 
   courses Course[]
   goals   Goal[]

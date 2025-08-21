@@ -43,4 +43,19 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  linkedin?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  github?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  website?: string;
 }

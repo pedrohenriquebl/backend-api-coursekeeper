@@ -5,16 +5,14 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
-  constructor(
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findFirst({ 
-      where: { 
+    const user = await this.prisma.user.findFirst({
+      where: {
         email,
         deletedAt: null,
-       } 
+      },
     });
     if (!user) return null;
     return new User(
@@ -28,6 +26,13 @@ export class PrismaUserRepository implements IUserRepository {
       user.description,
       user.createdAt,
       user.updatedAt,
+      user.deletedAt,
+      user.linkedin,
+      user.github,
+      user.website,
+      user.currentLoginStreak ?? 0,
+      user.maxLoginStreak ?? 0,
+      user.lastLogin ?? null,
     );
   }
 
@@ -42,6 +47,12 @@ export class PrismaUserRepository implements IUserRepository {
         cpf: user.cpf,
         profileImage: user.profileImage,
         description: user.description,
+        linkedin: user.linkedin,
+        github: user.github,
+        website: user.website,
+        currentLoginStreak: user.currentLoginStreak ?? 0,
+        maxLoginStreak: user.maxLoginStreak ?? 0,
+        lastLogin: user.lastLogin ?? null,
       },
     });
     return new User(
@@ -55,6 +66,13 @@ export class PrismaUserRepository implements IUserRepository {
       createdUser.description,
       createdUser.createdAt,
       createdUser.updatedAt,
+      createdUser.deletedAt,
+      createdUser.linkedin,
+      createdUser.github,
+      createdUser.website,
+      createdUser.currentLoginStreak,
+      createdUser.maxLoginStreak,
+      createdUser.lastLogin,
     );
   }
 
@@ -69,6 +87,12 @@ export class PrismaUserRepository implements IUserRepository {
         cpf: user.cpf,
         profileImage: user.profileImage,
         description: user.description,
+        linkedin: user.linkedin,
+        github: user.github,
+        website: user.website,
+        currentLoginStreak: user.currentLoginStreak ?? 0,
+        maxLoginStreak: user.maxLoginStreak ?? 0,
+        lastLogin: user.lastLogin ?? undefined,
       },
     });
     return new User(
@@ -82,15 +106,22 @@ export class PrismaUserRepository implements IUserRepository {
       updatedUser.description,
       updatedUser.createdAt,
       updatedUser.updatedAt,
+      updatedUser.deletedAt,
+      updatedUser.linkedin,
+      updatedUser.github,
+      updatedUser.website,
+      updatedUser.currentLoginStreak,
+      updatedUser.maxLoginStreak,
+      updatedUser.lastLogin,
     );
   }
 
   async findById(id: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({ 
-      where: { 
+    const user = await this.prisma.user.findFirst({
+      where: {
         id: Number(id),
         deletedAt: null,
-      } 
+      },
     });
     if (!user) return null;
     return new User(
@@ -104,6 +135,13 @@ export class PrismaUserRepository implements IUserRepository {
       user.description,
       user.createdAt,
       user.updatedAt,
+      user.deletedAt,
+      user.linkedin,
+      user.github,
+      user.website,
+      user.currentLoginStreak ?? 0,
+      user.maxLoginStreak ?? 0,
+      user.lastLogin ?? null,
     );
   }
 
@@ -117,6 +155,9 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.user.update({ where: { id: Number(id) }, data: { deletedAt: new Date() } });
+    await this.prisma.user.update({
+      where: { id: Number(id) },
+      data: { deletedAt: new Date() },
+    });
   }
 }

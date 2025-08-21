@@ -1,4 +1,3 @@
-// src/common/upload/avatar.multer.ts
 import { BadRequestException } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { existsSync, mkdirSync } from 'fs';
