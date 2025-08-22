@@ -136,13 +136,8 @@ export class GoalService {
           const streakAtStart = goal.streakAtStart ?? 0;
           const currentStreak = user.currentLoginStreak ?? 0;
 
-          console.log('streak at start -> ', streakAtStart);
-          console.log('current streak -> ', currentStreak);
-
           newCurrent = Math.max(0, currentStreak - streakAtStart);
-
-          console.log('new current streak -> ', newCurrent);
-
+          
           if (newCurrent >= goal.target) {
             newCurrent = goal.target;
             newStatus = GoalStatus.CONCLUIDA;
