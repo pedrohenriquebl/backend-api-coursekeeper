@@ -81,6 +81,7 @@ model Goal {
   updatedAt   DateTime   @updatedAt
   completedAt DateTime?
   description String?
+  streakAtStart   Int?
 
   user   User @relation(fields: [userId], references: [id])
   userId Int

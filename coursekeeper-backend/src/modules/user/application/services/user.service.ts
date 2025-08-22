@@ -54,7 +54,7 @@ export class UserService {
       null,
       0,
       0,
-      null
+      null,
     );
 
     return this.userRepository.create(user);
@@ -126,22 +126,20 @@ export class UserService {
     let currentStreak = user.currentLoginStreak ?? 0;
     let maxStreak = user.maxLoginStreak ?? 0;
 
-    console.log(`Current Streak: ${currentStreak}, Max Streak: ${maxStreak}`);
-
     if (user.lastLogin) {
       console.log(`Last Login: ${user.lastLogin}`);
       const lastLoginDate = new Date(user.lastLogin);
-      const diffInDays = Math.floor(
-        (now.getTime() - lastLoginDate.getTime()) / (1000 * 60 * 60 * 24),
-      );
+      const diffInDays = this.differenceInDays(now, lastLoginDate);
 
       if (diffInDays === 1) {
         currentStreak += 1;
+        console.log(`diffInDays === 1 -> Current Streak incremented to: ${currentStreak}`);
       } else if (diffInDays > 1) {
-        currentStreak = 1;
-      } else {
+        console.log(`diffInDays > 1 -> Current Streak reset to: 1`);
         currentStreak = 1;
       }
+    } else {
+      currentStreak = 1;
     }
 
     if (currentStreak > maxStreak) {
@@ -166,6 +164,8 @@ export class UserService {
     const token = this.jwtService.sign(payload);
 
     const { password, ...userWithoutPassword } = user;
+
+    await this.goalService.updateGoalProgress(userId, 0, "", "");
 
     return {
       access_token: token,
@@ -230,5 +230,12 @@ export class UserService {
       goalsProgressPercent,
       latestGoal,
     };
+  }
+
+  private differenceInDays(date1: Date, date2: Date) {
+    const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
+    const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+    const diffTime = d1.getTime() - d2.getTime();
+    return diffTime / (1000 * 60 * 60 * 24);
   }
 }

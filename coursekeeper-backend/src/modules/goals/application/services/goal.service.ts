@@ -15,6 +15,12 @@ export class GoalService {
   ) {}
 
   async create(userId: number, dto: CreateGoalDto): Promise<Goal> {
+    const user = await this.userRepository.findById(String(userId));
+
+    if (!user) {
+      throw new NotFoundException(`Usuário ${userId} não encontrado`);
+    }
+
     try {
       return await this.goalsRepository.create({
         ...dto,
@@ -24,11 +30,14 @@ export class GoalService {
         deadline: new Date(dto.deadline),
         status: GoalStatus.ATIVA,
         topic: dto.topic ?? null,
+        streakAtStart:
+          dto.type === GoalType.PERIODO_ESTUDO
+            ? Math.max(0, (user?.currentLoginStreak ?? 0) - 1)
+            : null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
     } catch (error) {
-      console.error('Erro ao criar goal:', error);
       throw error;
     }
   }
@@ -120,11 +129,19 @@ export class GoalService {
           }
           break;
 
-        case 'PERIODO_ESTUDO':
+        case 'PERIODO_ESTUDO': {
           const user = await this.userRepository.findById(String(goal.userId));
           if (!user) break;
 
-          newCurrent = user.currentLoginStreak ?? 0;
+          const streakAtStart = goal.streakAtStart ?? 0;
+          const currentStreak = user.currentLoginStreak ?? 0;
+
+          console.log('streak at start -> ', streakAtStart);
+          console.log('current streak -> ', currentStreak);
+
+          newCurrent = Math.max(0, currentStreak - streakAtStart);
+
+          console.log('new current streak -> ', newCurrent);
 
           if (newCurrent >= goal.target) {
             newCurrent = goal.target;
@@ -132,6 +149,7 @@ export class GoalService {
             isActive = false;
           }
           break;
+        }
       }
 
       await this.goalsRepository.update(goal.id, {

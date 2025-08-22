@@ -16,6 +16,7 @@ export class Goal {
   completedAt?: Date | null;
   description?: string | null;
   userId: number;
+  streakAtStart?: number | null;
 }
 
 export interface LatestGoal {
