@@ -32,7 +32,7 @@ export class GoalService {
         topic: dto.topic ?? null,
         streakAtStart:
           dto.type === GoalType.PERIODO_ESTUDO
-            ? Math.max(0, (user?.currentLoginStreak ?? 0) - 1)
+            ? Math.max(0, (user?.currentLoginStreak ?? 0))
             : null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -136,7 +136,7 @@ export class GoalService {
           const streakAtStart = goal.streakAtStart ?? 0;
           const currentStreak = user.currentLoginStreak ?? 0;
 
-          newCurrent = Math.max(0, currentStreak - streakAtStart);
+          newCurrent = Math.max(0, (currentStreak - streakAtStart));
           
           if (newCurrent >= goal.target) {
             newCurrent = goal.target;
