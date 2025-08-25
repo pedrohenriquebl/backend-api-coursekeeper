@@ -13,6 +13,7 @@ import type { ICourseRepository } from '../../../courses/domain/repositories/cou
 import { GoalService } from 'src/modules/goals/application/services/goal.service';
 import { GoalStatus } from '@prisma/client';
 import { LatestGoal } from 'src/modules/goals/domain/entities/goals.entity';
+import { AchievementsService } from 'src/modules/achievements/application/services/achievements.service';
 
 export class UserService {
   constructor(
@@ -22,6 +23,7 @@ export class UserService {
     private readonly courseRepository: ICourseRepository,
     private readonly jwtService: JwtService,
     private readonly goalService: GoalService,
+    private readonly achievementsService: AchievementsService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
@@ -166,6 +168,8 @@ export class UserService {
     const { password, ...userWithoutPassword } = user;
 
     await this.goalService.updateGoalProgress(userId, 0, "", "");
+
+    await this.achievementsService.checkAndAssign(user.id);
 
     return {
       access_token: token,

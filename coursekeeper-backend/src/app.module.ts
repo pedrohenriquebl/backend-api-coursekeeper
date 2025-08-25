@@ -13,6 +13,8 @@ import { GoalModule } from './modules/goals/goals.module';
 import { GoalsController } from './modules/goals/presentation/controllers/goals.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DailyUpdateCronService } from './modules/courses/application/tasks/course-status.task';
+import { AchievementsModule } from './modules/achievements/achievements.module';
+import { AchievementsController } from './modules/achievements/presentation/controllers/achievements.controller';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { DailyUpdateCronService } from './modules/courses/application/tasks/cour
     AuthModule,
     CourseModule,
     GoalModule,
+    AchievementsModule,
     ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
@@ -31,6 +34,7 @@ import { DailyUpdateCronService } from './modules/courses/application/tasks/cour
     UserController,
     CourseController,
     GoalsController,
+    AchievementsController,
   ],
   providers: [AppService, Reflector, DailyUpdateCronService],
 })

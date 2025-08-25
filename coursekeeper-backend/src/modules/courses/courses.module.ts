@@ -7,9 +7,15 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { GoalService } from '../goals/application/services/goal.service';
 import { GoalModule } from '../goals/goals.module';
 import { DailyUpdateCronService } from './application/tasks/course-status.task';
+import { AchievementsModule } from '../achievements/achievements.module';
 
 @Module({
-  imports: [forwardRef(() => AuthModule), CqrsModule, GoalModule],
+  imports: [
+    forwardRef(() => AuthModule),
+    CqrsModule,
+    GoalModule,
+    AchievementsModule,
+  ],
   providers: [
     CourseService,
     PrismaService,

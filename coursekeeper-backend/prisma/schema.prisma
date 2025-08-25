@@ -30,12 +30,13 @@ model User {
   website      String?
 
   //login streak
-  currentLoginStreak Int          @default(0)
-  maxLoginStreak     Int          @default(0)
+  currentLoginStreak Int       @default(0)
+  maxLoginStreak     Int       @default(0)
   lastLogin          DateTime?
 
-  courses Course[]
-  goals   Goal[]
+  courses         Course[]
+  goals           Goal[]
+  UserAchievement UserAchievement[]
 }
 
 model Course {
@@ -67,24 +68,46 @@ model Course {
 }
 
 model Goal {
-  id          Int        @id @default(autoincrement())
-  isActive    Boolean    @default(true)
-  title       String
-  type        GoalType
-  target      Int
-  current     Int        @default(0)
-  unit        GoalUnits
-  topic       Topic?
-  deadline    DateTime
-  status      GoalStatus
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  completedAt DateTime?
-  description String?
-  streakAtStart   Int?
+  id            Int        @id @default(autoincrement())
+  isActive      Boolean    @default(true)
+  title         String
+  type          GoalType
+  target        Int
+  current       Int        @default(0)
+  unit          GoalUnits
+  topic         Topic?
+  deadline      DateTime
+  status        GoalStatus
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  completedAt   DateTime?
+  description   String?
+  streakAtStart Int?
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
+}
+
+model UserAchievement {
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  achievementId Int
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+model Achievement {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  name        String
+  description String
+  icon        String?
+  condition   String?
+
+  userAchievements UserAchievement[]
 }
 
 enum Topic {

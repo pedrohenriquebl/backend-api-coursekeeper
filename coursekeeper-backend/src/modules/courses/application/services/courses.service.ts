@@ -1,15 +1,23 @@
-import { ForbiddenException, Inject, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  NotFoundException,
+} from '@nestjs/common';
 import type { ICourseRepository } from '../../domain/repositories/courses.repository.interface';
 import { Courses } from '../../domain/entities/courses.entity';
 import { CreateCourseDto } from '../../presentation/dtos/create-course.dto';
 import { UpdateCourseDto } from '../../presentation/dtos/update-course.dto';
 import { GoalService } from 'src/modules/goals/application/services/goal.service';
+import { AchievementsService } from 'src/modules/achievements/application/services/achievements.service';
 
 export class CourseService {
   constructor(
     @Inject('ICourseRepository')
     private readonly courseRepository: ICourseRepository,
     private readonly goalService: GoalService,
+    @Inject(forwardRef(() => AchievementsService))
+    private readonly achievementsService: AchievementsService,
   ) {}
 
   async findById(userId: number, courseId: number): Promise<Courses | null> {
@@ -146,6 +154,8 @@ export class CourseService {
         course.topic,
         status,
       );
+
+      await this.achievementsService.checkAndAssign(course.userId);
     }
 
     return updatedCourse;
