@@ -9,7 +9,7 @@
 1. Instale as dependências globais (caso não tenha):
 
 ```bash
-npm install -g @nestjs/cli prisma
+npm install -g @nestjs/cli prisma 
 ```
 
 2. Instale as dependências do projeto:
