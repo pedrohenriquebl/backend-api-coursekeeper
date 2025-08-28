@@ -1,3 +1,66 @@
+# CourseKeeper Backend
+
+## Requisitos
+- Node.js v18.x ou superior
+- npm v9.x ou superior
+
+## Instalação
+
+1. Instale as dependências globais (caso não tenha):
+
+```bash
+npm install -g @nestjs/cli prisma
+```
+
+2. Instale as dependências do projeto:
+
+```bash
+npm install
+```
+
+## Configuração do Banco de Dados
+
+1. Copie o arquivo `.env.example` para `.env` e configure a variável `DATABASE_URL` com sua conexão PostgreSQL.
+
+## Migrations e Seed
+
+1. Rode as migrations para criar as tabelas no banco:
+
+```bash
+npx prisma migrate dev --name init
+```
+
+2. (Opcional) Rode o seed para popular conquistas e dados iniciais:
+
+```bash
+npx prisma db seed
+```
+
+## Rodando o Projeto
+
+```bash
+npm run start:dev
+```
+
+
+## Testando as APIs no Swagger
+
+Acesse a documentação Swagger em: [http://localhost:3000/api](http://localhost:3000/api)
+
+Exemplos de endpoints para testar:
+
+- Criar usuário: `POST /users`
+- Login: `POST /users/login`
+- Buscar usuário logado: `GET /users/me` (necessário token JWT)
+- Listar cursos: `GET /courses`
+- Criar curso: `POST /courses`
+- Listar conquistas: `GET /achievements`
+
+Você pode testar todos os endpoints diretamente pela interface do Swagger.
+
+---
+
+Se tiver dúvidas, consulte o código ou abra uma issue!
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
