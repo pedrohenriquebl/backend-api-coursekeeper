@@ -32,7 +32,7 @@ export class GoalService {
         topic: dto.topic ?? null,
         streakAtStart:
           dto.type === GoalType.PERIODO_ESTUDO
-            ? Math.max(0, (user?.currentLoginStreak ?? 0))
+            ? Math.max(0, user?.currentLoginStreak ?? 0)
             : null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -120,11 +120,16 @@ export class GoalService {
 
         case 'CURSOS_CONCLUIDOS':
           if (courseStatus === 'CONCLUIDO') {
-            newCurrent += 1;
-            if (newCurrent >= goal.target) {
-              newCurrent = goal.target;
-              newStatus = GoalStatus.CONCLUIDA;
-              isActive = false;
+            const goalTopic = goal.topic?.toUpperCase().trim();
+            const courseTopic = topic?.toUpperCase().trim();
+
+            if (!goalTopic || goalTopic === courseTopic) {
+              newCurrent += 1;
+              if (newCurrent >= goal.target) {
+                newCurrent = goal.target;
+                newStatus = GoalStatus.CONCLUIDA;
+                isActive = false;
+              }
             }
           }
           break;
@@ -136,8 +141,8 @@ export class GoalService {
           const streakAtStart = goal.streakAtStart ?? 0;
           const currentStreak = user.currentLoginStreak ?? 0;
 
-          newCurrent = Math.max(0, (currentStreak - streakAtStart));
-          
+          newCurrent = Math.max(0, currentStreak - streakAtStart);
+
           if (newCurrent >= goal.target) {
             newCurrent = goal.target;
             newStatus = GoalStatus.CONCLUIDA;

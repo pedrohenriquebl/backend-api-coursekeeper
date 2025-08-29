@@ -118,6 +118,7 @@ enum Topic {
   MOBILE
   DATASCIENCE
   DESIGN
+  DATABASE
   OUTROS
 }
 
