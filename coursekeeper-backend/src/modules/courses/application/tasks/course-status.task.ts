@@ -13,7 +13,7 @@ export class DailyUpdateCronService {
   ) {}
 
   // Roda todos os dias às 03:00 da manhã
-  @Cron('11 10 * * *', { timeZone: 'America/Sao_Paulo' })
+  @Cron('0 3 * * *', { timeZone: 'America/Sao_Paulo' })
   async handleDailyUpdate() {
     this.logger.log('Iniciando atualização diária de cursos e metas...');
 
@@ -28,7 +28,13 @@ export class DailyUpdateCronService {
     const now = new Date();
 
     for (const course of courses) {
-      if (course.endDate && now > course.endDate && course.status !== 'NAO_CONCLUIDO') {
+      if (!course.endDate) continue;
+      
+      if (
+        now > course.endDate &&
+        course.status !== 'CONCLUIDO' &&
+        course.status !== 'NAO_CONCLUIDO'
+      ) {
         await this.courseService.systemUpdateCourse(course, {
           status: 'NAO_CONCLUIDO',
         });
