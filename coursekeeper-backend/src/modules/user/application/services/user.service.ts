@@ -135,7 +135,9 @@ export class UserService {
 
       if (diffInDays === 1) {
         currentStreak += 1;
-        console.log(`diffInDays === 1 -> Current Streak incremented to: ${currentStreak}`);
+        console.log(
+          `diffInDays === 1 -> Current Streak incremented to: ${currentStreak}`,
+        );
       } else if (diffInDays > 1) {
         console.log(`diffInDays > 1 -> Current Streak reset to: 1`);
         currentStreak = 1;
@@ -167,7 +169,7 @@ export class UserService {
 
     const { password, ...userWithoutPassword } = user;
 
-    await this.goalService.updateGoalProgress(userId, 0, "", "");
+    await this.goalService.updateGoalProgress(userId, 0, '', '');
 
     await this.achievementsService.checkAndAssign(user.id);
 
@@ -218,16 +220,24 @@ export class UserService {
 
     let latestGoal: LatestGoal | null = null;
     if (goals.length > 0) {
-      const sortedGoals = [...goals].sort(
-        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      const activeOrCompletedGoals = goals.filter(
+        (g) => g.status !== 'VENCIDA',
       );
-      const recent = sortedGoals[0];
-      latestGoal = {
-        title: recent.title,
-        target: recent.target,
-        current: recent.current,
-        status: recent.status,
-      };
+
+      if (activeOrCompletedGoals.length > 0) {
+        const sortedGoals = [...activeOrCompletedGoals].sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+        );
+
+        const recent = sortedGoals[0];
+
+        latestGoal = {
+          title: recent.title,
+          target: recent.target,
+          current: recent.current,
+          status: recent.status,
+        };
+      }
     }
 
     return {
