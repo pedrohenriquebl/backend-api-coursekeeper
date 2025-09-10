@@ -2,12 +2,14 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/application/services/user.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -36,9 +38,9 @@ export class AuthService {
       { secret: process.env.RESET_SECRET, expiresIn: '1h' },
     );
 
-    // Aqui você pode salvar o token no banco se quiser invalidar depois
-    // e também mandar por e-mail.
-    return { message: 'E-mail enviado', token }; // enquanto não tem e-mail, retorna direto
+    await this.mailService.sendPasswordReset(email, token);
+
+    return { message: 'E-mail enviado' };
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -53,7 +55,7 @@ export class AuthService {
       const hashed = await bcrypt.hash(newPassword, 10);
       user.password = hashed;
 
-      await this.userService.updateUser(String(user.id), { password: hashed });
+      await this.userService.updateUser(String(user.id), { password: newPassword });
 
       return { message: 'Senha redefinida com sucesso' };
     } catch {
