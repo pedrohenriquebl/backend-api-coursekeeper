@@ -33,6 +33,8 @@ export class PrismaUserRepository implements IUserRepository {
       user.currentLoginStreak ?? 0,
       user.maxLoginStreak ?? 0,
       user.lastLogin ?? null,
+      user.subscriptionPlan,
+      user.subscriptionValidUntil
     );
   }
 
@@ -53,6 +55,8 @@ export class PrismaUserRepository implements IUserRepository {
         currentLoginStreak: user.currentLoginStreak ?? 0,
         maxLoginStreak: user.maxLoginStreak ?? 0,
         lastLogin: user.lastLogin ?? null,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionValidUntil: user.subscriptionValidUntil ?? null,
       },
     });
     return new User(
@@ -73,6 +77,8 @@ export class PrismaUserRepository implements IUserRepository {
       createdUser.currentLoginStreak,
       createdUser.maxLoginStreak,
       createdUser.lastLogin,
+      createdUser.subscriptionPlan,
+      createdUser.subscriptionValidUntil
     );
   }
 
@@ -93,6 +99,8 @@ export class PrismaUserRepository implements IUserRepository {
         currentLoginStreak: user.currentLoginStreak ?? 0,
         maxLoginStreak: user.maxLoginStreak ?? 0,
         lastLogin: user.lastLogin ?? undefined,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionValidUntil: user.subscriptionValidUntil ?? null,
       },
     });
     return new User(
@@ -113,6 +121,8 @@ export class PrismaUserRepository implements IUserRepository {
       updatedUser.currentLoginStreak,
       updatedUser.maxLoginStreak,
       updatedUser.lastLogin,
+      updatedUser.subscriptionPlan,
+      updatedUser.subscriptionValidUntil
     );
   }
 
@@ -142,6 +152,8 @@ export class PrismaUserRepository implements IUserRepository {
       user.currentLoginStreak ?? 0,
       user.maxLoginStreak ?? 0,
       user.lastLogin ?? null,
+      user.subscriptionPlan,
+      user.subscriptionValidUntil
     );
   }
 

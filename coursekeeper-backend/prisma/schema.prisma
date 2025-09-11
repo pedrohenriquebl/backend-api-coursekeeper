@@ -29,10 +29,12 @@ model User {
   github       String?
   website      String?
 
-  //login streak
   currentLoginStreak Int       @default(0)
   maxLoginStreak     Int       @default(0)
   lastLogin          DateTime?
+
+  subscriptionPlan   SubscriptionPlan @default(FREE)
+  subscriptionValidUntil DateTime?
 
   courses         Course[]
   goals           Goal[]
@@ -43,11 +45,11 @@ model Course {
   id             Int          @id @default(autoincrement())
   name           String
   platform       Platform
-  platformCustom String? // caso platform = OUTROS
+  platformCustom String?
   duration       Int          @default(0)
   studiedHours   Int          @default(0)
   topic          Topic
-  topicCustom    String? // caso topic = OUTROS
+  topicCustom    String?
   progress       Int          @default(0)
   rating         Int          @default(0)
   comment        String?
@@ -57,7 +59,7 @@ model Course {
   description    String?
   instructor     String?
   language       Language?
-  languageCustom String? // caso language = OUTROS
+  languageCustom String?
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
@@ -165,4 +167,10 @@ enum Language {
   ESPANHOL
   FRANCES
   OUTROS
+}
+
+enum SubscriptionPlan {
+  FREE
+  GOLD
+  PLATINUM
 }

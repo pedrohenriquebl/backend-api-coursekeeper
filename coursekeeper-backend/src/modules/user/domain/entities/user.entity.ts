@@ -17,5 +17,7 @@ export class User {
     public currentLoginStreak?: number | null,
     public maxLoginStreak?: number | null,
     public lastLogin?: Date | null,
+    public subscriptionPlan: 'FREE' | 'GOLD' | 'PLATINUM' = 'FREE',
+    public subscriptionValidUntil?: Date | null,
   ) {}
 }

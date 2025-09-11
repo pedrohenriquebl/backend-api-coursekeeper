@@ -1,5 +1,5 @@
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
-import { ConflictException, Inject } from '@nestjs/common';
+import { ConflictException, Inject, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from '../../presentation/dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../domain/entities/user.entity';
@@ -11,9 +11,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { ICourseRepository } from '../../../courses/domain/repositories/courses.repository.interface';
 import { GoalService } from 'src/modules/goals/application/services/goal.service';
-import { GoalStatus } from '@prisma/client';
+import { GoalStatus, SubscriptionPlan } from '@prisma/client';
 import { LatestGoal } from 'src/modules/goals/domain/entities/goals.entity';
 import { AchievementsService } from 'src/modules/achievements/application/services/achievements.service';
+import { UpdateSubscriptionDto } from '../../presentation/dtos/update-subscription.dto';
+import { PlanDuration } from '../../domain/enums/plan-duration.enum';
 
 export class UserService {
   constructor(
@@ -57,6 +59,8 @@ export class UserService {
       0,
       0,
       null,
+      'FREE',
+      null,
     );
 
     return this.userRepository.create(user);
@@ -75,6 +79,7 @@ export class UserService {
     user.website = dto.website ?? user.website;
     user.github = dto.github ?? user.github;
     user.linkedin = dto.linkedin ?? user.linkedin;
+    user.updatedAt = new Date();
 
     if (dto.password) {
       user.password = await bcrypt.hash(dto.password, 10);
@@ -123,6 +128,9 @@ export class UserService {
     );
 
     if (!isPasswordValid) return null;
+
+    this.checkSubscriptionExpiration(user);
+    await this.userRepository.update(user);
 
     const now = new Date();
     let currentStreak = user.currentLoginStreak ?? 0;
@@ -175,7 +183,11 @@ export class UserService {
 
     return {
       access_token: token,
-      user: userWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionValidUntil: user.subscriptionValidUntil ?? null,
+      },
       courseStats,
       goalsStats: goalStats,
     };
@@ -244,6 +256,80 @@ export class UserService {
       goalsProgressPercent,
       latestGoal,
     };
+  }
+
+  async updateSubscription(
+    userId: number,
+    dto: UpdateSubscriptionDto & { duration?: string },
+  ) {
+    const user = await this.userRepository.findById(userId.toString());
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+
+    user.subscriptionPlan = dto.subscriptionPlan;
+
+    if (dto.subscriptionPlan === SubscriptionPlan.FREE) {
+      user.subscriptionValidUntil = null;
+    } else {
+      const planDuration: PlanDuration =
+        dto.duration === 'annual' ? PlanDuration.ANNUAL : PlanDuration.MONTHLY;
+
+      user.subscriptionValidUntil = this.calculateValidUntil(planDuration);
+    }
+
+    user.updatedAt = new Date();
+    return this.userRepository.update(user);
+  }
+
+  async upgradePlan(
+    id: string,
+    plan: SubscriptionPlan,
+    duration: PlanDuration,
+  ): Promise<User | null> {
+    const user = await this.userRepository.findById(id);
+    if (!user) return null;
+
+    user.subscriptionPlan = plan;
+    user.subscriptionValidUntil = this.calculateValidUntil(duration);
+    user.updatedAt = new Date();
+
+    return this.userRepository.update(user);
+  }
+
+  private calculateValidUntil(duration: PlanDuration): Date {
+    const now = new Date();
+    if (duration === PlanDuration.MONTHLY) {
+      now.setMonth(now.getMonth() + 1);
+    } else if (duration === PlanDuration.ANNUAL) {
+      now.setFullYear(now.getFullYear() + 1);
+    }
+    return now;
+  }
+
+  private checkSubscriptionExpiration(user: User) {
+    if (
+      user.subscriptionValidUntil &&
+      new Date() > user.subscriptionValidUntil
+    ) {
+      user.subscriptionPlan = SubscriptionPlan.FREE;
+      user.subscriptionValidUntil = null;
+    }
+
+    if (user.subscriptionPlan === SubscriptionPlan.FREE) {
+      user.subscriptionValidUntil = null;
+    }
+  }
+
+  async validateSubscription(user: User): Promise<User> {
+    if (
+      user.subscriptionValidUntil &&
+      new Date() > user.subscriptionValidUntil
+    ) {
+      user.subscriptionPlan = SubscriptionPlan.FREE;
+      user.subscriptionValidUntil = null;
+      user.updatedAt = new Date();
+      return this.userRepository.update(user);
+    }
+    return user;
   }
 
   private differenceInDays(date1: Date, date2: Date) {

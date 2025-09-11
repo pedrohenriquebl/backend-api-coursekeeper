@@ -25,6 +25,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { avatarMulterOptions } from 'src/common/upload/avatar.multer';
+import { UpdateSubscriptionDto } from '../dtos/update-subscription.dto';
+import { UpgradePlanDto } from '../dtos/upgrade-plan.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -59,13 +61,19 @@ export class UserController {
 
     if (!user) throw new UnauthorizedException();
 
+    const validatedUser = await this.userService.validateSubscription(user);
+
     const generalCoursesInfo = await this.userService.getCourseStats(
-      Number(user?.id),
+      Number(validatedUser.id),
     );
-    const goalsStats = await this.userService.getGoalsStats(Number(user?.id));
+    const goalsStats = await this.userService.getGoalsStats(
+      Number(validatedUser.id),
+    );
 
     return {
-      ...user,
+      ...validatedUser,
+      subscriptionPlan: validatedUser.subscriptionPlan || 'FREE',
+      subscriptionValidUntil: validatedUser.subscriptionValidUntil || null,
       generalCoursesInfo,
       goalsStats,
     };
@@ -120,5 +128,27 @@ export class UserController {
   @HttpCode(204)
   async deleteUser(@Param('id') id: string): Promise<void> {
     return this.userService.softDeleteUser(id);
+  }
+
+  @ApiBearerAuth('jwt-auth')
+  @ApiOperation({ summary: 'Update user subscription plan' })
+  @UseGuards(AuthGuard('jwt'))
+  @Put(':id/subscription')
+  async updateSubscription(
+    @Param('id') id: string,
+    @Body() dto: UpdateSubscriptionDto,
+  ) {
+    return this.userService.updateSubscription(Number(id), dto);
+  }
+
+  @ApiBearerAuth('jwt-auth')
+  @ApiOperation({ summary: 'Upgrade user subscription plan' })
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/subscription/upgrade')
+  async upgradeSubscription(
+    @Param('id') id: string,
+    @Body() dto: UpgradePlanDto,
+  ) {
+    return this.userService.upgradePlan(id, dto.subscriptionPlan, dto.type);
   }
 }

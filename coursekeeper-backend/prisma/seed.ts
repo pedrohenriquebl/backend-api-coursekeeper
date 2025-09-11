@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SubscriptionPlan } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -133,6 +133,27 @@ async function main() {
   }
 
   console.log('Achievements seeded successfully!');
+
+  const users = await prisma.user.findMany({
+    where: { subscriptionPlan: undefined },
+  });
+
+  if (users.length === 0) {
+    console.log('Todos os usuários já possuem um plano definido.');
+    return;
+  }
+
+  for (const user of users) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        subscriptionPlan: SubscriptionPlan.FREE,
+        subscriptionValidUntil: null,
+      },
+    });
+  }
+
+  console.log(`Atualizados ${users.length} usuários com plano FREE.`);
 }
 
 main()

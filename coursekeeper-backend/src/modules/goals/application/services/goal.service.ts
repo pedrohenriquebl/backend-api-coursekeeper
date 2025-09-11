@@ -1,4 +1,4 @@
-import { Inject, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, NotFoundException } from '@nestjs/common';
 import type { IGoalsRepository } from '../../domain/repositories/goals.repository.interface';
 import { Goal } from '../../domain/entities/goals.entity';
 import { CreateGoalDto } from '../../presentation/dto/create-goals.dto';
@@ -21,6 +21,17 @@ export class GoalService {
       throw new NotFoundException(`Usuário ${userId} não encontrado`);
     }
 
+    const activeGoals = await this.goalsRepository.findAllByUser(userId);
+    const activeCount = activeGoals.filter((goal) => goal.isActive).length;
+    const maxActiveGoals = this.getActiveGoalsLimit(user.subscriptionPlan);
+
+    if (activeCount >= maxActiveGoals) {
+      throw new HttpException(
+        `Plano ${user.subscriptionPlan} permite no máximo ${maxActiveGoals} metas ativas`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     try {
       return await this.goalsRepository.create({
         ...dto,
@@ -39,6 +50,20 @@ export class GoalService {
       });
     } catch (error) {
       throw error;
+    }
+  }
+
+  private getActiveGoalsLimit(subscriptionPlan: string): number {
+    switch (subscriptionPlan) {
+      case 'FREE':
+        return 2;
+      case 'GOLD':
+        return 10;
+      case 'PLATINUM':
+      case 'PREMIUM':
+        return Infinity;
+      default:
+        return 2;
     }
   }
 
