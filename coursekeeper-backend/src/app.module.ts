@@ -15,6 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DailyUpdateCronService } from './modules/courses/application/tasks/course-status.task';
 import { AchievementsModule } from './modules/achievements/achievements.module';
 import { AchievementsController } from './modules/achievements/presentation/controllers/achievements.controller';
+import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AchievementsController } from './modules/achievements/presentation/cont
     CourseModule,
     GoalModule,
     AchievementsModule,
+    AiAssistantModule,
     ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
@@ -34,7 +36,7 @@ import { AchievementsController } from './modules/achievements/presentation/cont
     UserController,
     CourseController,
     GoalsController,
-    AchievementsController,
+    AchievementsController,    
   ],
   providers: [AppService, Reflector, DailyUpdateCronService],
 })

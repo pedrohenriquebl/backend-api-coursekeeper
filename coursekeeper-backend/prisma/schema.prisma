@@ -39,6 +39,8 @@ model User {
   courses         Course[]
   goals           Goal[]
   UserAchievement UserAchievement[]
+
+  chatMessages ChatMessage[]
 }
 
 model Course {
@@ -110,6 +112,20 @@ model Achievement {
   condition   String?
 
   userAchievements UserAchievement[]
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  role      ChatRole // 'user' ou 'assistant'
+  message   String
+  createdAt DateTime @default(now())
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
 }
 
 enum Topic {
