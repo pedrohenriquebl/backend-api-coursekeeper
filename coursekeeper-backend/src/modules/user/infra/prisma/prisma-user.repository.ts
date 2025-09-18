@@ -57,6 +57,8 @@ export class PrismaUserRepository implements IUserRepository {
         lastLogin: user.lastLogin ?? null,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionValidUntil: user.subscriptionValidUntil ?? null,
+        acceptedTermsAt: user.acceptedTermsAt ?? new Date(),
+        acceptedPrivacyAt: user.acceptedPrivacyAt ?? new Date(),
       },
     });
     return new User(

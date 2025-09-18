@@ -19,5 +19,7 @@ export class User {
     public lastLogin?: Date | null,
     public subscriptionPlan: 'FREE' | 'GOLD' | 'PLATINUM' = 'FREE',
     public subscriptionValidUntil?: Date | null,
+    public acceptedTermsAt?: Date | null,
+    public acceptedPrivacyAt?: Date | null,
   ) {}
 }

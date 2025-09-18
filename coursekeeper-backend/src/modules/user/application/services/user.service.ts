@@ -29,6 +29,12 @@ export class UserService {
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
+    if (!dto.acceptedTerms || !dto.acceptedPrivacy) {
+      throw new ConflictException(
+        'Você precisa aceitar os termos de uso e a política de privacidade.',
+      );
+    }
+
     const existingCpfUser = await this.userRepository.findByCpf(dto.cpf);
 
     if (existingCpfUser) {
@@ -61,6 +67,8 @@ export class UserService {
       null,
       'FREE',
       null,
+      new Date(),
+      new Date(),
     );
 
     return this.userRepository.create(user);

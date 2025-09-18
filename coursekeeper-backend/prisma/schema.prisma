@@ -18,7 +18,7 @@ model User {
   firstName    String
   lastName     String
   email        String    @unique
-  password     String    @unique
+  password     String   
   cpf          String    @unique
   profileImage String?
   description  String?
@@ -35,6 +35,9 @@ model User {
 
   subscriptionPlan   SubscriptionPlan @default(FREE)
   subscriptionValidUntil DateTime?
+
+  acceptedTermsAt    DateTime?
+  acceptedPrivacyAt  DateTime?
 
   courses         Course[]
   goals           Goal[]
