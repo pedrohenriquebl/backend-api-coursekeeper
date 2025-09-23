@@ -154,7 +154,7 @@ export class PrismaCourseRepository implements ICourseRepository {
 
   async findRecentByUser(userId: number, limit: number): Promise<Courses[]> {
     return this.prisma.course.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
@@ -164,20 +164,34 @@ export class PrismaCourseRepository implements ICourseRepository {
     userId: number,
     offset: number,
     limit: number,
+    query?: string,
+    topic?: string,
+    platform?: string,
+    status?: string,
   ): Promise<[Courses[], number]> {
-    const [courses, total] = await this.prisma.$transaction([
-      this.prisma.course.findMany({
-        where: { userId, deletedAt: null },
-        orderBy: { createdAt: 'asc' },
-        skip: offset,
-        take: limit,
-      }),
-      this.prisma.course.count({
-        where: { userId, deletedAt: null },
-      }),
-    ]);
+    const whereClause: any = { userId, deletedAt: null };
 
-    return [courses, total];
+    if (query) {
+      whereClause.OR = [
+        { name: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+      ];
+    }
+    if (topic) whereClause.topic = topic;
+    if (platform) whereClause.platform = platform;
+    if (status) whereClause.status = status;
+
+    const total = await this.prisma.course.count({ where: whereClause });
+    const courses = await this.prisma.course.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'asc' },
+      skip: offset,
+      take: limit,
+    });
+    
+    const mappedCourses = courses.map((c) => new Courses({ ...c }));
+
+    return [mappedCourses, total];
   }
 
   async findAllByUserSimple(userId: number): Promise<Courses[]> {

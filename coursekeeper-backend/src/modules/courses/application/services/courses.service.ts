@@ -33,12 +33,19 @@ export class CourseService {
   }
 
   async findAllByUserSimple(userId: number): Promise<Courses[]> {
-    return (await this.courseRepository.findAllByUserSimple(userId)) ?? [];
+    return (await this.courseRepository.findAllByUser(userId)) ?? [];
   }
 
   async findAllByUser(
     userId: number,
-    options?: { page?: number; limit?: number },
+    options?: {
+      page?: number;
+      limit?: number;
+      query?: string;
+      topic?: string;
+      platform?: string;
+      status?: string;
+    },
   ): Promise<{
     courses: Courses[];
     total: number;
@@ -53,6 +60,10 @@ export class CourseService {
       userId,
       offset,
       limit,
+      options?.query,
+      options?.topic,
+      options?.platform,
+      options?.status,
     );
 
     return {

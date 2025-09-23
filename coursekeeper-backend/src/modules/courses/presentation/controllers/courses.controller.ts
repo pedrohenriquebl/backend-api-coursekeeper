@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CourseService } from '../../application/services/courses.service';
 import {
   Body,
@@ -12,10 +12,12 @@ import {
   UseGuards,
   ParseIntPipe,
   Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCourseDto } from '../dtos/create-course.dto';
 import { UpdateCourseDto } from '../dtos/update-course.dto';
+import { FindCoursesQueryDto } from '../dtos/query-course.dto';
 
 @ApiTags('courses')
 @Controller('courses/:userId')
@@ -25,12 +27,26 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get()
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({ name: 'query', required: false, type: String })
+  @ApiQuery({ name: 'topic', required: false, type: String, example: 'all' })
+  @ApiQuery({ name: 'platform', required: false, type: String, example: 'all' })
+  @ApiQuery({ name: 'status', required: false, type: String, example: 'all' })
   async findAllByUser(
     @Param('userId', ParseIntPipe) userId: number,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query() query: FindCoursesQueryDto,
   ) {
-    return this.courseService.findAllByUser(+userId, { page, limit });
+    const { page, limit, query: q, topic, platform, status } = query;
+
+    return this.courseService.findAllByUser(userId, {
+      page,
+      limit,
+      query: q,
+      topic: topic === 'all' ? undefined : topic,
+      platform: platform === 'all' ? undefined : platform,
+      status: status === 'all' ? undefined : status,
+    });
   }
 
   @Get('recent')
@@ -44,7 +60,7 @@ export class CourseController {
     @Param('courseId', ParseIntPipe) courseId: number,
   ) {
     return this.courseService.findById(userId, courseId);
-  }  
+  }
 
   @Post()
   async create(
