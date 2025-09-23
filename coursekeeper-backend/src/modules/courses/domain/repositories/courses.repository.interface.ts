@@ -8,4 +8,6 @@ export interface ICourseRepository {
     update(course: Courses): Promise<Courses | null>;
     delete(id: number): Promise<void>;
     findRecentByUser(userId: number, limit: number): Promise<Courses[]>;
+    findAllByUserPaginated(userId: number, offset: number, limit: number): Promise<[Courses[], number]>;
+    findAllByUserSimple(userId: number): Promise<Courses[]>;
 }

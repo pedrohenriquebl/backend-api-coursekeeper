@@ -23,7 +23,7 @@ export class CourseService {
   async findById(userId: number, courseId: number): Promise<Courses | null> {
     const course = await this.courseRepository.findById(courseId);
     if (!course)
-      throw new NotFoundException(`Course with ID ${courseId} not found`);
+      throw new NotFoundException(`Course with ID ${courseId} not foun d`);
     if (course.userId !== userId) throw new ForbiddenException('Access denied');
     return course;
   }
@@ -32,8 +32,35 @@ export class CourseService {
     return this.courseRepository.findRecentByUser(userId, 3);
   }
 
-  async findAllByUser(userId: number): Promise<Courses[]> {
-    return (await this.courseRepository.findAllByUser(userId)) ?? [];
+  async findAllByUserSimple(userId: number): Promise<Courses[]> {
+    return (await this.courseRepository.findAllByUserSimple(userId)) ?? [];
+  }
+
+  async findAllByUser(
+    userId: number,
+    options?: { page?: number; limit?: number },
+  ): Promise<{
+    courses: Courses[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const page = options?.page && options.page > 0 ? options.page : 1;
+    const limit = options?.limit && options.limit > 0 ? options.limit : 10;
+    const offset = (page - 1) * limit;
+
+    const [courses, total] = await this.courseRepository.findAllByUserPaginated(
+      userId,
+      offset,
+      limit,
+    );
+
+    return {
+      courses,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findAll(): Promise<Courses[]> {

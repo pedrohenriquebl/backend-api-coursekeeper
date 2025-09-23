@@ -11,6 +11,7 @@ import {
   Put,
   UseGuards,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCourseDto } from '../dtos/create-course.dto';
@@ -24,8 +25,12 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get()
-  async findAllByUser(@Param('userId', ParseIntPipe) userId: number) {
-    return this.courseService.findAllByUser(+userId);
+  async findAllByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.courseService.findAllByUser(+userId, { page, limit });
   }
 
   @Get('recent')

@@ -73,7 +73,10 @@ export class PrismaCourseRepository implements ICourseRepository {
     );
   }
 
-  async findAllByUser(userId: number, includeDeleted = false): Promise<Courses[]> {
+  async findAllByUser(
+    userId: number,
+    includeDeleted = false,
+  ): Promise<Courses[]> {
     const whereClause: any = { userId };
     if (!includeDeleted) whereClause.deletedAt = null;
 
@@ -155,5 +158,34 @@ export class PrismaCourseRepository implements ICourseRepository {
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
+  }
+
+  async findAllByUserPaginated(
+    userId: number,
+    offset: number,
+    limit: number,
+  ): Promise<[Courses[], number]> {
+    const [courses, total] = await this.prisma.$transaction([
+      this.prisma.course.findMany({
+        where: { userId, deletedAt: null },
+        orderBy: { createdAt: 'asc' },
+        skip: offset,
+        take: limit,
+      }),
+      this.prisma.course.count({
+        where: { userId, deletedAt: null },
+      }),
+    ]);
+
+    return [courses, total];
+  }
+
+  async findAllByUserSimple(userId: number): Promise<Courses[]> {
+    const courses = await this.prisma.course.findMany({
+      where: { userId, deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return courses.map((c) => new Courses({ ...c }));
   }
 }

@@ -28,7 +28,7 @@ export class AchievementsService {
   async checkAndAssign(userId: number): Promise<void> {
     const achievements = await this.achievementsRepo.findAll();
     const user = await this.userService.findById(String(userId));
-    const courses = await this.courseService.findAllByUser(userId);
+    const courses = await this.courseService.findAllByUserSimple(userId);
     const goals = await this.goalService.getAll(userId);
 
     for (const achievement of achievements) {
