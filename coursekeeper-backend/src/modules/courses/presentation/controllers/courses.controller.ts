@@ -49,6 +49,13 @@ export class CourseController {
     });
   }
 
+  @Get('all')
+  async findAllByUserNoPagination(
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.courseService.findAllByUserSimple(userId);
+  }
+
   @Get('recent')
   async findRecentByUser(@Param('userId', ParseIntPipe) userId: number) {
     return this.courseService.findRecentByUser(userId);
