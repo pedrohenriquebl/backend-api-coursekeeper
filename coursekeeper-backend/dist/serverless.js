@@ -7,7 +7,6 @@ exports.default = handler;
 const core_1 = require("@nestjs/core");
 const platform_express_1 = require("@nestjs/platform-express");
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
 const common_1 = require("@nestjs/common");
 const app_module_1 = require("./app.module");
 const swagger_1 = require("@nestjs/swagger");
@@ -16,21 +15,20 @@ async function bootstrapServer() {
     if (cachedServer)
         return cachedServer;
     const expressApp = (0, express_1.default)();
-    console.log('process.env.DATABASE_URL:', process.env.DATABASE_URL);
-    expressApp.use((0, cors_1.default)({
-        origin: [
-            'https://frontend-coursekeeper.vercel.app',
-            'http://localhost:3001',
-        ],
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-    }));
     const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(expressApp));
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
     }));
+    app.enableCors({
+        origin: [
+            'https://frontend-coursekeeper.vercel.app',
+            'http://localhost:3001',
+        ],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    });
     const config = new swagger_1.DocumentBuilder()
         .setTitle('CourseKeeper API')
         .setDescription('API for managing users')
@@ -56,7 +54,7 @@ async function handler(req, res) {
     }
     catch (err) {
         console.error('Serverless handler error:', err);
-        res.status(500).send('Internal Server Error');
+        res.status(500).send({ statusCode: 500, message: 'Internal Server Error' });
     }
 }
 //# sourceMappingURL=serverless.js.map

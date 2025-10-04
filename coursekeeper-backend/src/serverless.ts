@@ -1,7 +1,7 @@
+// src/serverless.ts
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express, { Request, Response } from 'express';
-import cors from 'cors';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -9,40 +9,37 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 let cachedServer: express.Express;
 
 /**
- * Inicializa o Nest em um ExpressApp e retorna
- * para ser usado como handler serverless
+ * Inicializa o Nest em um ExpressApp para serverless
  */
 async function bootstrapServer(): Promise<express.Express> {
   if (cachedServer) return cachedServer;
 
   const expressApp = express();
 
-  console.log('process.env.DATABASE_URL:', process.env.DATABASE_URL);
-
-  // Configuração CORS (para qualquer frontend)
-  expressApp.use(
-    cors({
-      origin: [
-        'https://frontend-coursekeeper.vercel.app',
-        'http://localhost:3001',
-      ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    }),
-  );
-
+  // Cria o Nest app com ExpressAdapter
   const app = await NestFactory.create(
     AppModule,
     new ExpressAdapter(expressApp),
   );
 
+  // Configuração global de validação
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
+      whitelist: true, // remove campos extras
+      forbidNonWhitelisted: true, // lança erro se campos extras enviados
+      transform: true, // converte tipos automaticamente
     }),
   );
+
+  // Configuração CORS (permitindo frontend Vercel e localhost)
+  app.enableCors({
+    origin: [
+      'https://frontend-coursekeeper.vercel.app',
+      'http://localhost:3001',
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   // Configuração Swagger
   const config = new DocumentBuilder()
@@ -62,7 +59,7 @@ async function bootstrapServer(): Promise<express.Express> {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('doc', app, document);
+  SwaggerModule.setup('doc', app, document); // rota Swagger: /doc
 
   await app.init();
 
@@ -71,7 +68,7 @@ async function bootstrapServer(): Promise<express.Express> {
 }
 
 /**
- * Handler que o Vercel vai chamar
+ * Handler chamado pelo Vercel
  */
 export default async function handler(req: Request, res: Response) {
   try {
@@ -79,6 +76,6 @@ export default async function handler(req: Request, res: Response) {
     return server(req, res);
   } catch (err) {
     console.error('Serverless handler error:', err);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send({ statusCode: 500, message: 'Internal Server Error' });
   }
 }
