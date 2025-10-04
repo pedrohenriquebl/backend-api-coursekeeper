@@ -3,11 +3,14 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-let server: express.Express;
+let cachedServer: express.Express;
 
-export async function bootstrapServer(): Promise<express.Express> {
-  if (server) return server;
+async function bootstrapServer(): Promise<express.Express> {
+  if (cachedServer) {
+    return cachedServer;
+  }
 
   const expressApp = express();
   const app = await NestFactory.create(
@@ -24,18 +27,33 @@ export async function bootstrapServer(): Promise<express.Express> {
     }),
   );
 
+  // Configuração do Swagger
+  const config = new DocumentBuilder()
+    .setTitle('CourseKeeper API')
+    .setDescription('API for managing users')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        in: 'header',
+      },
+      'jwt-auth',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
   await app.init();
-  server = expressApp;
-  return server;
+
+  cachedServer = expressApp;
+  return cachedServer;
 }
 
 export default async function handler(req: any, res: any) {
-  const s = await bootstrapServer();
-  try {
-    return s(req, res);
-  } catch (err) {
-    console.error('Serverless handler error:', err);
-    res.statusCode = 500;
-    res.end('Internal Server Error');
-  }
+  const server = await bootstrapServer();
+  return server(req, res);
 }
