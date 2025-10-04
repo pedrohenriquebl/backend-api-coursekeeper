@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('CWD:', process.cwd());
+console.log('CWD now:', process.cwd());
 
 try {
   const distPath = path.join(process.cwd(), 'dist');
