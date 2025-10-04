@@ -279,7 +279,9 @@ export class UserService {
       user.subscriptionValidUntil = null;
     } else {
       const planDuration: PlanDuration =
-        dto.duration === 'annual' ? PlanDuration.ANNUAL : PlanDuration.MONTHLY;
+        dto.duration?.toLowerCase() === 'annual'
+          ? PlanDuration.ANNUAL
+          : PlanDuration.MONTHLY;
 
       user.subscriptionValidUntil = this.calculateValidUntil(planDuration);
     }

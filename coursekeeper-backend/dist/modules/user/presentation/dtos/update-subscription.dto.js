@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateSubscriptionDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-const plan_duration_enum_1 = require("../../domain/enums/plan-duration.enum");
 const SubscriptionPlanValues = ['FREE', 'GOLD', 'PLATINUM'];
+const PlanDurationValues = ['MONTHLY', 'ANNUAL'];
 class UpdateSubscriptionDto {
     subscriptionPlan;
     duration;
@@ -25,9 +25,9 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateSubscriptionDto.prototype, "subscriptionPlan", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: plan_duration_enum_1.PlanDuration, default: plan_duration_enum_1.PlanDuration.MONTHLY }),
+    (0, swagger_1.ApiPropertyOptional)({ enum: PlanDurationValues, default: 'MONTHLY' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(plan_duration_enum_1.PlanDuration),
+    (0, class_validator_1.IsEnum)(PlanDurationValues),
     __metadata("design:type", String)
 ], UpdateSubscriptionDto.prototype, "duration", void 0);
 //# sourceMappingURL=update-subscription.dto.js.map

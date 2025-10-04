@@ -232,7 +232,9 @@ let UserService = class UserService {
             user.subscriptionValidUntil = null;
         }
         else {
-            const planDuration = dto.duration === 'annual' ? plan_duration_enum_1.PlanDuration.ANNUAL : plan_duration_enum_1.PlanDuration.MONTHLY;
+            const planDuration = dto.duration?.toLowerCase() === 'annual'
+                ? plan_duration_enum_1.PlanDuration.ANNUAL
+                : plan_duration_enum_1.PlanDuration.MONTHLY;
             user.subscriptionValidUntil = this.calculateValidUntil(planDuration);
         }
         user.updatedAt = new Date();
