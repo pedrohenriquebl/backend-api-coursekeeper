@@ -17,6 +17,8 @@ async function bootstrapServer(): Promise<express.Express> {
 
   const expressApp = express();
 
+  console.log('process.env.DATABASE_URL:', process.env.DATABASE_URL);
+
   // Configuração CORS (para qualquer frontend)
   expressApp.use(
     cors({

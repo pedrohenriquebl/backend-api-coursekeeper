@@ -16,6 +16,7 @@ async function bootstrapServer() {
     if (cachedServer)
         return cachedServer;
     const expressApp = (0, express_1.default)();
+    console.log('process.env.DATABASE_URL:', process.env.DATABASE_URL);
     expressApp.use((0, cors_1.default)({
         origin: [
             'https://frontend-coursekeeper.vercel.app',
