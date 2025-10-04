@@ -1,11 +1,27 @@
-const handler = require('../dist/serverless').default;
+const fs = require('fs');
+const path = require('path');
 
-module.exports = async (req, res) => {
-  try {
-    return await handler(req, res);
-  } catch (err) {
-    console.error('Serverless handler error:', err);
-    res.statusCode = 500;
-    res.end('Internal Server Error');
+console.log('CWD:', process.cwd());
+
+try {
+  const distPath = path.join(process.cwd(), 'dist');
+  if (fs.existsSync(distPath)) {
+    console.log('FILES in dist:', fs.readdirSync(distPath));
+  } else {
+    console.log('dist folder does NOT exist');
   }
-};
+} catch (err) {
+  console.error('Error reading dist folder:', err);
+}
+
+let handler;
+
+try {
+  handler = require('../dist/serverless').default;
+} catch (e) {
+  console.error(
+    'Could not load serverless handler. Make sure to run `npm run build` before deploy.',
+    e,
+  );
+  throw e;
+}
