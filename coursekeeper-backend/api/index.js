@@ -17,7 +17,7 @@ try {
 let handler;
 
 try {
-  handler = require('../dist/serverless').default;
+  handler = require('./dist/serverless').default;
 } catch (e) {
   console.error(
     'Could not load serverless handler. Make sure to run `npm run build` before deploy.',
