@@ -4,7 +4,7 @@ import express from 'express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
-let server: express.Express | undefined;
+let server: express.Express;
 
 export async function bootstrapServer(): Promise<express.Express> {
   if (server) return server;
@@ -14,6 +14,7 @@ export async function bootstrapServer(): Promise<express.Express> {
     AppModule,
     new ExpressAdapter(expressApp),
   );
+
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
@@ -23,13 +24,18 @@ export async function bootstrapServer(): Promise<express.Express> {
     }),
   );
 
-  // initialize Nest without listening to a port (serverless)
   await app.init();
   server = expressApp;
-  return server as express.Express;
+  return server;
 }
 
 export default async function handler(req: any, res: any) {
   const s = await bootstrapServer();
-  return s(req, res);
+  try {
+    return s(req, res);
+  } catch (err) {
+    console.error('Serverless handler error:', err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
 }

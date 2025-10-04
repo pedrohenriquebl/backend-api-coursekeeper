@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma.service';
 export class PrismaCourseRepository implements ICourseRepository {
   constructor(private readonly prisma: PrismaService) {}
   async findById(id: number): Promise<Courses | null> {
-    const course = await this.prisma.course.findUnique({
+    const course = await this.prisma.client.course.findUnique({
       where: { id },
     });
 
@@ -40,7 +40,7 @@ export class PrismaCourseRepository implements ICourseRepository {
   }
 
   async findAll(): Promise<Courses[]> {
-    const courses = await this.prisma.course.findMany({
+    const courses = await this.prisma.client.course.findMany({
       where: { deletedAt: null },
     });
 
@@ -80,7 +80,7 @@ export class PrismaCourseRepository implements ICourseRepository {
     const whereClause: any = { userId };
     if (!includeDeleted) whereClause.deletedAt = null;
 
-    const courses = await this.prisma.course.findMany({
+    const courses = await this.prisma.client.course.findMany({
       where: whereClause,
       orderBy: { createdAt: 'asc' },
     });
@@ -88,7 +88,7 @@ export class PrismaCourseRepository implements ICourseRepository {
   }
 
   async create(course: Courses): Promise<Courses> {
-    const createdCourse = await this.prisma.course.create({
+    const createdCourse = await this.prisma.client.course.create({
       data: {
         name: course.name,
         description: course.description,
@@ -138,7 +138,7 @@ export class PrismaCourseRepository implements ICourseRepository {
   }
 
   async update(course: Courses): Promise<Courses | null> {
-    const updated = await this.prisma.course.update({
+    const updated = await this.prisma.client.course.update({
       where: { id: course.id },
       data: { ...course },
     });
@@ -146,14 +146,14 @@ export class PrismaCourseRepository implements ICourseRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.prisma.course.update({
+    await this.prisma.client.course.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
   }
 
   async findRecentByUser(userId: number, limit: number): Promise<Courses[]> {
-    return this.prisma.course.findMany({
+    return this.prisma.client.course.findMany({
       where: { userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -181,21 +181,21 @@ export class PrismaCourseRepository implements ICourseRepository {
     if (platform) whereClause.platform = platform;
     if (status) whereClause.status = status;
 
-    const total = await this.prisma.course.count({ where: whereClause });
-    const courses = await this.prisma.course.findMany({
+    const total = await this.prisma.client.course.count({ where: whereClause });
+    const courses = await this.prisma.client.course.findMany({
       where: whereClause,
       orderBy: { createdAt: 'asc' },
       skip: offset,
       take: limit,
     });
-    
+
     const mappedCourses = courses.map((c) => new Courses({ ...c }));
 
     return [mappedCourses, total];
   }
 
   async findAllByUserSimple(userId: number): Promise<Courses[]> {
-    const courses = await this.prisma.course.findMany({
+    const courses = await this.prisma.client.course.findMany({
       where: { userId, deletedAt: null },
       orderBy: { createdAt: 'asc' },
     });

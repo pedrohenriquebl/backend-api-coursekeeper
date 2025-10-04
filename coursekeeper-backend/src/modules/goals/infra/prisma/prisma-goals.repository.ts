@@ -8,15 +8,17 @@ import { GoalStatus, GoalType } from '@prisma/client';
 export class PrismaGoalsRepository implements IGoalsRepository {
   constructor(private readonly prisma: PrismaService) {}
   async create(goal: Goal): Promise<Goal> {
-    return this.prisma.goal.create({ data: goal }) as unknown as Goal;
+    return this.prisma.client.goal.create({ data: goal }) as unknown as Goal;
   }
 
   async findById(id: number): Promise<Goal | null> {
-    return this.prisma.goal.findUnique({ where: { id } }) as unknown as Goal;
+    return this.prisma.client.goal.findUnique({
+      where: { id },
+    }) as unknown as Goal;
   }
 
   async findAllByUser(userId: number): Promise<Goal[]> {
-    return this.prisma.goal.findMany({
+    return this.prisma.client.goal.findMany({
       where: { userId },
     }) as unknown as Goal[];
   }
@@ -24,7 +26,7 @@ export class PrismaGoalsRepository implements IGoalsRepository {
   async update(id: number, data: Partial<Goal>): Promise<Goal> {
     const cleanData = this.toPrismaGoal(data);
 
-    const updatedGoal = await this.prisma.goal.update({
+    const updatedGoal = await this.prisma.client.goal.update({
       where: { id },
       data: cleanData,
     });
@@ -33,7 +35,7 @@ export class PrismaGoalsRepository implements IGoalsRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.prisma.goal.delete({ where: { id } });
+    await this.prisma.client.goal.delete({ where: { id } });
   }
 
   private toPrismaGoal(goal: Partial<Goal>): any {
@@ -63,6 +65,6 @@ export class PrismaGoalsRepository implements IGoalsRepository {
   }
 
   findAll(): Promise<Goal[]> {
-    return this.prisma.goal.findMany() as unknown as Promise<Goal[]>;
+    return this.prisma.client.goal.findMany() as unknown as Promise<Goal[]>;
   }
 }

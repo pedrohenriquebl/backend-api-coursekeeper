@@ -1,27 +1,10 @@
-const { createServer } = require('http');
-const { parse } = require('url');
-
-// Import the compiled serverless handler from the build output
-let handler;
-try {
-  handler = require('../dist/serverless').default;
-} catch (e) {
-  console.error(
-    'Could not load serverless handler. Make sure to run `npm run build` before deploy.',
-    e,
-  );
-  throw e;
-}
+const handler = require('../dist/serverless').default;
 
 module.exports = async (req, res) => {
-  // ensure handler is a function
-  const fn =
-    typeof handler === 'function' ? handler : handler.default || handler;
-
   try {
-    return await fn(req, res);
+    return await handler(req, res);
   } catch (err) {
-    console.error('Error in serverless handler:', err);
+    console.error('Serverless handler error:', err);
     res.statusCode = 500;
     res.end('Internal Server Error');
   }

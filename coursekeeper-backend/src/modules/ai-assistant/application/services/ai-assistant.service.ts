@@ -23,36 +23,51 @@ export class AiAssistantService {
   }
 
   async chatWithUser(userId: number, message: string): Promise<string> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.client.user.findUnique({
+      where: { id: userId },
+    });
     if (!user) throw new Error('Usuário não encontrado');
 
     const userName = `${user.firstName} ${user.lastName}`;
 
     const [userCourses, goals, achievements] = await Promise.all([
-      this.prisma.course.findMany({
+      this.prisma.client.course.findMany({
         where: { userId },
         select: { name: true, progress: true, status: true },
       }),
-      this.prisma.goal.findMany({
+      this.prisma.client.goal.findMany({
         where: { userId, isActive: true },
-        select: { title: true, type: true, current: true, target: true, unit: true },
+        select: {
+          title: true,
+          type: true,
+          current: true,
+          target: true,
+          unit: true,
+        },
       }),
-      this.prisma.userAchievement.findMany({
+      this.prisma.client.userAchievement.findMany({
         where: { userId },
         select: { achievement: { select: { name: true } } },
       }),
     ]);
 
     const coursesText = userCourses.length
-      ? userCourses.map(c => `- ${c.name} | Progresso: ${c.progress}% | Status: ${c.status}`).join('\n')
+      ? userCourses
+          .map(
+            (c) =>
+              `- ${c.name} | Progresso: ${c.progress}% | Status: ${c.status}`,
+          )
+          .join('\n')
       : 'Nenhum curso cadastrado';
 
     const goalsText = goals.length
-      ? goals.map(g => `- ${g.title}: ${g.current}/${g.target} ${g.unit}`).join('\n')
+      ? goals
+          .map((g) => `- ${g.title}: ${g.current}/${g.target} ${g.unit}`)
+          .join('\n')
       : 'Nenhuma meta ativa';
 
     const achievementsText = achievements.length
-      ? achievements.map(a => `- ${a.achievement.name}`).join('\n')
+      ? achievements.map((a) => `- ${a.achievement.name}`).join('\n')
       : 'Nenhuma conquista desbloqueada';
 
     const recentMessages = await this.aiRepo.getRecentMessages(userId, 10);
@@ -83,7 +98,7 @@ export class AiAssistantService {
           ${achievementsText}
         `,
       },
-      ...recentMessages.map(m => ({
+      ...recentMessages.map((m) => ({
         role: m.role === ChatRole.USER ? 'user' : 'assistant',
         content: m.message,
       })),
@@ -100,8 +115,12 @@ export class AiAssistantService {
       const response = completion.choices[0].message?.content || '';
 
       await Promise.all([
-        this.aiRepo.saveMessage(new ChatMessage(userId, ChatRole.USER, message)),
-        this.aiRepo.saveMessage(new ChatMessage(userId, ChatRole.ASSISTANT, response)),
+        this.aiRepo.saveMessage(
+          new ChatMessage(userId, ChatRole.USER, message),
+        ),
+        this.aiRepo.saveMessage(
+          new ChatMessage(userId, ChatRole.ASSISTANT, response),
+        ),
       ]);
 
       return response;

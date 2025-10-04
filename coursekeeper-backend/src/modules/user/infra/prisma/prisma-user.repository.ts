@@ -8,7 +8,7 @@ export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.client.user.findFirst({
       where: {
         email,
         deletedAt: null,
@@ -34,12 +34,12 @@ export class PrismaUserRepository implements IUserRepository {
       user.maxLoginStreak ?? 0,
       user.lastLogin ?? null,
       user.subscriptionPlan,
-      user.subscriptionValidUntil
+      user.subscriptionValidUntil,
     );
   }
 
   async create(user: User): Promise<User> {
-    const createdUser = await this.prisma.user.create({
+    const createdUser = await this.prisma.client.user.create({
       data: {
         id: user.id,
         firstName: user.firstName,
@@ -80,12 +80,12 @@ export class PrismaUserRepository implements IUserRepository {
       createdUser.maxLoginStreak,
       createdUser.lastLogin,
       createdUser.subscriptionPlan,
-      createdUser.subscriptionValidUntil
+      createdUser.subscriptionValidUntil,
     );
   }
 
   async update(user: User): Promise<User> {
-    const updatedUser = await this.prisma.user.update({
+    const updatedUser = await this.prisma.client.user.update({
       where: { id: user.id },
       data: {
         firstName: user.firstName,
@@ -124,12 +124,12 @@ export class PrismaUserRepository implements IUserRepository {
       updatedUser.maxLoginStreak,
       updatedUser.lastLogin,
       updatedUser.subscriptionPlan,
-      updatedUser.subscriptionValidUntil
+      updatedUser.subscriptionValidUntil,
     );
   }
 
   async findById(id: string): Promise<User | null> {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.client.user.findFirst({
       where: {
         id: Number(id),
         deletedAt: null,
@@ -155,12 +155,12 @@ export class PrismaUserRepository implements IUserRepository {
       user.maxLoginStreak ?? 0,
       user.lastLogin ?? null,
       user.subscriptionPlan,
-      user.subscriptionValidUntil
+      user.subscriptionValidUntil,
     );
   }
 
   async findByCpf(cpf: string): Promise<User | null> {
-    return await this.prisma.user.findFirst({
+    return await this.prisma.client.user.findFirst({
       where: {
         cpf,
         deletedAt: null,
@@ -169,7 +169,7 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.user.update({
+    await this.prisma.client.user.update({
       where: { id: Number(id) },
       data: { deletedAt: new Date() },
     });

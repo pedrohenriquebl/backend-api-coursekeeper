@@ -8,7 +8,7 @@ export class PrismaAchievementsRepository implements IAchievementsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Achievement[]> {
-    const achievements = await this.prisma.achievement.findMany();
+    const achievements = await this.prisma.client.achievement.findMany();
     return achievements.map(
       (a) =>
         new Achievement(
@@ -23,7 +23,9 @@ export class PrismaAchievementsRepository implements IAchievementsRepository {
   }
 
   async findById(id: number): Promise<Achievement | null> {
-    const a = await this.prisma.achievement.findUnique({ where: { id } });
+    const a = await this.prisma.client.achievement.findUnique({
+      where: { id },
+    });
     if (!a) return null;
     return new Achievement(
       a.id,
@@ -39,14 +41,16 @@ export class PrismaAchievementsRepository implements IAchievementsRepository {
     userId: number,
     achievementId: number,
   ): Promise<boolean> {
-    const userAchievement = await this.prisma.userAchievement.findUnique({
-      where: { userId_achievementId: { userId, achievementId } },
-    });
+    const userAchievement = await this.prisma.client.userAchievement.findUnique(
+      {
+        where: { userId_achievementId: { userId, achievementId } },
+      },
+    );
     return !!userAchievement;
   }
 
   async assignToUser(userId: number, achievementId: number): Promise<void> {
-    await this.prisma.userAchievement.create({
+    await this.prisma.client.userAchievement.create({
       data: { userId, achievementId },
     });
   }

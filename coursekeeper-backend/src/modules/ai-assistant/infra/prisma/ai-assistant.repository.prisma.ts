@@ -9,34 +9,57 @@ export class AiAssistantRepositoryPrisma implements IAiAssistantRepository {
   constructor(private prisma: PrismaService) {}
 
   async saveMessage(message: ChatMessage): Promise<ChatMessage> {
-    const created = await this.prisma.chatMessage.create({
+    const created = await this.prisma.client.chatMessage.create({
       data: {
         userId: message.userId,
         role: message.role,
         message: message.message,
       },
     });
-    return new ChatMessage(created.userId, created.role as ChatRole, created.message, created.createdAt, created.id);
+    return new ChatMessage(
+      created.userId,
+      created.role as ChatRole,
+      created.message,
+      created.createdAt,
+      created.id,
+    );
   }
 
-  async getRecentMessages(userId: number, limit: number): Promise<ChatMessage[]> {
-    const messages = await this.prisma.chatMessage.findMany({
+  async getRecentMessages(
+    userId: number,
+    limit: number,
+  ): Promise<ChatMessage[]> {
+    const messages = await this.prisma.client.chatMessage.findMany({
       where: { userId },
       orderBy: { createdAt: 'asc' },
       take: limit,
     });
     return messages.map(
-      (m) => new ChatMessage(m.userId, m.role as ChatRole, m.message, m.createdAt, m.id)
+      (m) =>
+        new ChatMessage(
+          m.userId,
+          m.role as ChatRole,
+          m.message,
+          m.createdAt,
+          m.id,
+        ),
     );
   }
 
   async getAllMessages(userId: number): Promise<ChatMessage[]> {
-    const messages = await this.prisma.chatMessage.findMany({
+    const messages = await this.prisma.client.chatMessage.findMany({
       where: { userId },
       orderBy: { createdAt: 'asc' },
     });
     return messages.map(
-      (m) => new ChatMessage(m.userId, m.role as ChatRole, m.message, m.createdAt, m.id)
+      (m) =>
+        new ChatMessage(
+          m.userId,
+          m.role as ChatRole,
+          m.message,
+          m.createdAt,
+          m.id,
+        ),
     );
   }
 }
