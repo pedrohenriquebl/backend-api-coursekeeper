@@ -1,20 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
 
-const SubscriptionPlanValues = ['FREE', 'GOLD', 'PLATINUM'] as const;
-type SubscriptionPlanType = (typeof SubscriptionPlanValues)[number];
+export enum SubscriptionPlan {
+  FREE = 'FREE',
+  GOLD = 'GOLD',
+  PLATINUM = 'PLATINUM',
+}
 
-// PlanDuration
-const PlanDurationValues = ['MONTHLY', 'ANNUAL'] as const;
-type PlanDurationType = (typeof PlanDurationValues)[number];
+export enum PlanDuration {
+  MONTHLY = 'MONTHLY',
+  ANNUAL = 'ANNUAL',
+}
 
 export class UpdateSubscriptionDto {
-  @ApiProperty({ enum: SubscriptionPlanValues })
-  @IsEnum(SubscriptionPlanValues)
-  subscriptionPlan: SubscriptionPlanType;
+  @ApiProperty({ enum: SubscriptionPlan })
+  @IsEnum(SubscriptionPlan)
+  subscriptionPlan: SubscriptionPlan;
 
-  @ApiPropertyOptional({ enum: PlanDurationValues, default: 'MONTHLY' })
+  @ApiPropertyOptional({ enum: PlanDuration, default: PlanDuration.MONTHLY })
   @IsOptional()
-  @IsEnum(PlanDurationValues)
-  duration?: PlanDurationType;
+  @IsEnum(PlanDuration)
+  duration?: PlanDuration;
 }

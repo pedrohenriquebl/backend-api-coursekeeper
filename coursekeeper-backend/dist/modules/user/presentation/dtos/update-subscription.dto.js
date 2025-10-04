@@ -9,25 +9,34 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateSubscriptionDto = void 0;
+exports.UpdateSubscriptionDto = exports.PlanDuration = exports.SubscriptionPlan = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-const SubscriptionPlanValues = ['FREE', 'GOLD', 'PLATINUM'];
-const PlanDurationValues = ['MONTHLY', 'ANNUAL'];
+var SubscriptionPlan;
+(function (SubscriptionPlan) {
+    SubscriptionPlan["FREE"] = "FREE";
+    SubscriptionPlan["GOLD"] = "GOLD";
+    SubscriptionPlan["PLATINUM"] = "PLATINUM";
+})(SubscriptionPlan || (exports.SubscriptionPlan = SubscriptionPlan = {}));
+var PlanDuration;
+(function (PlanDuration) {
+    PlanDuration["MONTHLY"] = "MONTHLY";
+    PlanDuration["ANNUAL"] = "ANNUAL";
+})(PlanDuration || (exports.PlanDuration = PlanDuration = {}));
 class UpdateSubscriptionDto {
     subscriptionPlan;
     duration;
 }
 exports.UpdateSubscriptionDto = UpdateSubscriptionDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: SubscriptionPlanValues }),
-    (0, class_validator_1.IsEnum)(SubscriptionPlanValues),
+    (0, swagger_1.ApiProperty)({ enum: SubscriptionPlan }),
+    (0, class_validator_1.IsEnum)(SubscriptionPlan),
     __metadata("design:type", String)
 ], UpdateSubscriptionDto.prototype, "subscriptionPlan", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: PlanDurationValues, default: 'MONTHLY' }),
+    (0, swagger_1.ApiPropertyOptional)({ enum: PlanDuration, default: PlanDuration.MONTHLY }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(PlanDurationValues),
+    (0, class_validator_1.IsEnum)(PlanDuration),
     __metadata("design:type", String)
 ], UpdateSubscriptionDto.prototype, "duration", void 0);
 //# sourceMappingURL=update-subscription.dto.js.map
