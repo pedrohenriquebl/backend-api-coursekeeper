@@ -12,30 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateSubscriptionDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-const client_1 = require("@prisma/client");
 const plan_duration_enum_1 = require("../../domain/enums/plan-duration.enum");
-function safeEnum(enumObj) {
-    if (!enumObj)
-        throw new Error('Enum is undefined');
-    return enumObj;
-}
+const SubscriptionPlanValues = ['FREE', 'GOLD', 'PLATINUM'];
 class UpdateSubscriptionDto {
     subscriptionPlan;
     duration;
 }
 exports.UpdateSubscriptionDto = UpdateSubscriptionDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: safeEnum(client_1.SubscriptionPlan) }),
-    (0, class_validator_1.IsEnum)(safeEnum(client_1.SubscriptionPlan)),
+    (0, swagger_1.ApiProperty)({ enum: SubscriptionPlanValues }),
+    (0, class_validator_1.IsEnum)(SubscriptionPlanValues),
     __metadata("design:type", String)
 ], UpdateSubscriptionDto.prototype, "subscriptionPlan", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        enum: safeEnum(plan_duration_enum_1.PlanDuration),
-        default: plan_duration_enum_1.PlanDuration.MONTHLY,
-    }),
+    (0, swagger_1.ApiPropertyOptional)({ enum: plan_duration_enum_1.PlanDuration, default: plan_duration_enum_1.PlanDuration.MONTHLY }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(safeEnum(plan_duration_enum_1.PlanDuration)),
+    (0, class_validator_1.IsEnum)(plan_duration_enum_1.PlanDuration),
     __metadata("design:type", String)
 ], UpdateSubscriptionDto.prototype, "duration", void 0);
 //# sourceMappingURL=update-subscription.dto.js.map
