@@ -2,14 +2,10 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/serverless.js",
-      "use": "@vercel/node"
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": { "zeroConfig": true }
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "dist/serverless.js"
-    }
-  ]
+  "routes": [{ "src": "/(.*)", "dest": "dist/serverless.js" }]
 }
