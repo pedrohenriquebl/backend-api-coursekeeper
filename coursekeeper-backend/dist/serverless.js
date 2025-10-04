@@ -17,7 +17,10 @@ async function bootstrapServer() {
         return cachedServer;
     const expressApp = (0, express_1.default)();
     expressApp.use((0, cors_1.default)({
-        origin: '*',
+        origin: [
+            'https://frontend-coursekeeper.vercel.app',
+            'http://localhost:3001',
+        ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     }));

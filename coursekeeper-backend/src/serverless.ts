@@ -20,7 +20,10 @@ async function bootstrapServer(): Promise<express.Express> {
   // Configuração CORS (para qualquer frontend)
   expressApp.use(
     cors({
-      origin: '*', // ou coloque a URL do seu frontend
+      origin: [
+        'https://frontend-coursekeeper.vercel.app',
+        'http://localhost:3001',
+      ],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     }),
