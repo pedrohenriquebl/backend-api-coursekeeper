@@ -2,22 +2,22 @@
 
 FROM node:20-alpine
 
-# Cria pasta de trabalho
+# Diretório de trabalho dentro do container
 WORKDIR /app
 
-# Instala dependências básicas do Alpine para build do Prisma
+# Dependências do Alpine necessárias para build do Prisma
 RUN apk add --no-cache bash build-base python3 make g++
 
-# Copia package.json e package-lock.json primeiro para cache do npm
+# Copia apenas package.json e package-lock.json primeiro
 COPY package*.json ./
 
-# Instala dependências
-RUN npm ci
+# Instala dependências, ignorando scripts (para não rodar postinstall antes da pasta prisma existir)
+RUN npm ci --ignore-scripts
 
-# Copia todo o backend (incluindo prisma/)
+# Copia o restante do backend, incluindo prisma/
 COPY . .
 
-# Gera o Prisma Client
+# Gera o Prisma Client manualmente
 RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Build do NestJS

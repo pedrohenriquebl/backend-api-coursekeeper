@@ -6,7 +6,14 @@ import { PrismaClient } from '@prisma/client';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'https://frontend-coursekeeper.vercel.app',
+      'http://localhost:3001',
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
