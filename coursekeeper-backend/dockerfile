@@ -1,0 +1,29 @@
+# 1. Escolhe a imagem base do Node
+FROM node:22.16.0
+
+# 2. Define diretório de trabalho dentro da imagem
+WORKDIR /app
+
+# 3. Copia package.json e package-lock.json primeiro (para aproveitar cache do Docker)
+COPY package*.json ./
+
+# 4. Instala dependências (incluindo dev)
+RUN npm ci --include=dev
+
+# 5. Copia todo o código do projeto para a imagem
+COPY . .
+
+# 6. Copia a pasta do Prisma explicitamente (se não estiver dentro do COPY .)
+# COPY prisma ./prisma   # só se não estiver na cópia geral acima
+
+# 7. Gera o cliente Prisma
+RUN npx prisma generate --schema=prisma/schema.prisma
+
+# 8. Build do NestJS
+RUN npx nest build
+
+# 9. Expõe a porta que o Nest vai rodar
+EXPOSE 3000
+
+# 10. Define comando para rodar o app
+CMD ["node", "dist/main.js"]
