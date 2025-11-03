@@ -1,29 +1,23 @@
-# 1. Escolhe a imagem base do Node
-FROM node:22.16.0
+# docker/Dockerfile
+FROM node:20-alpine
 
-# 2. Define diretório de trabalho dentro da imagem
 WORKDIR /app
 
-# 3. Copia package.json e package-lock.json primeiro (para aproveitar cache do Docker)
-COPY package*.json ./
+RUN apk update && apk upgrade && apk add --no-cache bash
 
-# 4. Instala dependências (incluindo dev)
-RUN npm ci --include=dev
+# Copia package.json e package-lock.json do backend
+COPY ../coursekeeper-backend/package*.json ./
+RUN npm ci
 
-# 5. Copia todo o código do projeto para a imagem
-COPY . .
+# Copia todo o backend
+COPY ../coursekeeper-backend ./
 
-# 6. Copia a pasta do Prisma explicitamente (se não estiver dentro do COPY .)
-# COPY prisma ./prisma   # só se não estiver na cópia geral acima
-
-# 7. Gera o cliente Prisma
+# Gera Prisma Client
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-# 8. Build do NestJS
-RUN npx nest build
+# Build do Nest
+RUN npm run build
 
-# 9. Expõe a porta que o Nest vai rodar
 EXPOSE 3000
 
-# 10. Define comando para rodar o app
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]
